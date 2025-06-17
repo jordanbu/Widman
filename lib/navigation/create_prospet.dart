@@ -12,12 +12,16 @@ class CreateProspect extends StatelessWidget {
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
+<<<<<<< HEAD
         title: const Text(
             style: TextStyle(
               color: Colors.white
             ),
             'Registrar Prospecto'),
         
+=======
+        title: const Text('Registrar Prospecto'),
+>>>>>>> de09a8f02b6fc70bde2b58720baf62aaff230645
         backgroundColor: const Color(0xFF455A64),
         actions: [
           TextButton(
@@ -96,6 +100,7 @@ class CreateProspect extends StatelessWidget {
                 onPressed: () {
                   // Agregar ubicación
                 },
+<<<<<<< HEAD
                 icon: const Icon(
 
                     Icons.location_on ),
@@ -105,6 +110,10 @@ class CreateProspect extends StatelessWidget {
                       color: Colors.white
                     ),
                     'AGREGAR UBICACIÓN'),
+=======
+                icon: const Icon(Icons.location_on),
+                label: const Text('AGREGAR UBICACIÓN'),
+>>>>>>> de09a8f02b6fc70bde2b58720baf62aaff230645
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.red,
                   padding: const EdgeInsets.symmetric(vertical: 16),
