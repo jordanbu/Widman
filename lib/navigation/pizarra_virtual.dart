@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 
-class ReportListVencidas extends StatelessWidget {
-  const ReportListVencidas({super.key});
+class PizarraVirtual extends StatelessWidget {
+  const PizarraVirtual({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Reporte Listas Vencidas'),
+        title: const Text('Pizarra Virtual'),
         backgroundColor: const Color(0xFF455A64),
       ),
       body: const Center(
         child: Text(
-          'Pantalla de Reporte Listas',
+          'Pantalla Pizarra Virtual',
           style: TextStyle(fontSize: 24),
         ),
       ),

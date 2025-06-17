@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 
-class ReportListVencidas extends StatelessWidget {
-  const ReportListVencidas({super.key});
+class VentNavigation extends StatelessWidget {
+  const VentNavigation({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Reporte Listas Vencidas'),
+        title: const Text('Venta'),
         backgroundColor: const Color(0xFF455A64),
       ),
       body: const Center(
         child: Text(
-          'Pantalla de Reporte Listas',
+          'Pantalla de Venta',
           style: TextStyle(fontSize: 24),
         ),
       ),

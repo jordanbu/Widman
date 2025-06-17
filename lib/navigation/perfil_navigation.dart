@@ -8,7 +8,7 @@ class PerfilNavigation extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Perfil'),
-        backgroundColor: const Color(0xFF303F9F),
+        backgroundColor: const Color(0xFF455A64),
       ),
       body: const Center(
         child: Text(

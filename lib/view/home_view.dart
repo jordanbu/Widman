@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:widmancrm/navigation/cotizacion_navigation.dart';
+import 'package:widmancrm/navigation/create_prospet.dart';
 import 'package:widmancrm/navigation/perfil_navigation.dart';
+import 'package:widmancrm/navigation/pizarra_virtual.dart';
 import 'package:widmancrm/navigation/report_list_vencidas.dart';
+import 'package:widmancrm/navigation/stock_navigation.dart';
+import 'package:widmancrm/navigation/vent_navigation.dart';
 import 'login_view.dart';
 
 class HomeView extends StatelessWidget {
@@ -90,7 +95,7 @@ class HomeView extends StatelessWidget {
           children: [
             const DrawerHeader(
               decoration: BoxDecoration(
-                color: Color(0xFFCFD8DC),
+                color: Color(0xFF455A64),
               ),
               child: Text(
                 'Menú',
@@ -126,8 +131,44 @@ class HomeView extends StatelessWidget {
               onTap: () {
                 Navigator.pop(context); // Cierra el drawer
                 Navigator.push(context,
-                    MaterialPageRoute(builder: (context)=> ReportListVencidas()));
+                    MaterialPageRoute(builder: (context)=> CotizacionNavigation()));
                 // Agrega navegación o acción aquí
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.vertical_split),
+              title: const Text('Ventas'),
+              onTap: () {
+                Navigator.pop(context); // Cierra el drawer
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context)=> VentNavigation()));
+                // Agrega navegación o acción aquí
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.vertical_distribute),
+              title: const Text('Stock'),
+              onTap: () {
+                Navigator.push;
+                Navigator.push(context,MaterialPageRoute(builder: (context)=> StockNavigation()));
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.padding_rounded),
+              title: const Text('Crear Prospecto'),
+              onTap: () {
+                Navigator.push;
+                Navigator.push(context,MaterialPageRoute(builder: (context)=> CreateProspet()));
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.video_label),
+              title: const Text('Pizarra Virtual'),
+              onTap: () {
+                Navigator.push;
+                Navigator.push(context,
+                    MaterialPageRoute(builder:
+                        (context)=> PizarraVirtual()));
               },
             ),
             ListTile(
@@ -164,14 +205,7 @@ class HomeView extends StatelessWidget {
 
               },
             ),
-            ListTile(
-              leading: const Icon(Icons.vertical_distribute),
-              title: const Text('Stock'),
-              onTap: () {
-                Navigator.push;
 
-              },
-            ),
             ListTile(
               leading: const Icon(Icons.logout),
               title: const Text('Cerrar Sesión'),
