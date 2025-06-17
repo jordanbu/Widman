@@ -124,7 +124,7 @@ class HomeView extends StatelessWidget {
               onTap: () {
                 Navigator.pop(context); // Cierra el drawer
                 Navigator.push(context,
-                    MaterialPageRoute(builder: (context)=> CotizacionScreen()));
+                    MaterialPageRoute(builder: (context)=> CotizacionNavigation()));
                 // Agrega navegación o acción aquí
               },
             ),
