@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:widmancrm/navigation/cotizacion_navigation.dart';
 import 'package:widmancrm/navigation/create_prospet.dart';
-import 'package:widmancrm/navigation/perfil_navigation.dart';
 import 'package:widmancrm/navigation/pizarra_virtual.dart';
 import 'package:widmancrm/navigation/report_list_vencidas.dart';
 import 'package:widmancrm/navigation/stock_navigation.dart';
@@ -93,38 +92,32 @@ class HomeView extends StatelessWidget {
         child: ListView(
           padding: EdgeInsets.zero,
           children: [
-            const DrawerHeader(
-              decoration: BoxDecoration(
+            DrawerHeader(
+              decoration: const BoxDecoration(
                 color: Color(0xFF455A64),
               ),
-              child: Text(
-                'Menú',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
-
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Image.asset(
+                    'assets/logo_wid.png',
+                    height: 88,
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'WidmanCRM',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1.2, // Corregido: "latterSpacing" -> "letterSpacing"
+                    ),
+                  ),
+                ],
               ),
             ),
-            ListTile(
-              leading: const Icon(Icons.home),
-              title: const Text('Inicio'),
-              onTap: () {
-                Navigator.pop(context); // Cierra el drawer
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.person),
-              title: const Text('Perfil'),
-              onTap: () {
-                Navigator.pop(context); // Cierra el drawer
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context)=>const PerfilNavigation())
-                );
-                // Agrega navegación o acción aquí
-              },
-            ),
+
+
             ListTile(
               leading: const Icon(Icons.co_present),
               title: const Text('Cotizacion'),
@@ -158,7 +151,7 @@ class HomeView extends StatelessWidget {
               title: const Text('Crear Prospecto'),
               onTap: () {
                 Navigator.push;
-                Navigator.push(context,MaterialPageRoute(builder: (context)=> CreateProspet()));
+                Navigator.push(context,MaterialPageRoute(builder: (context)=> CreateProspect()));
               },
             ),
             ListTile(

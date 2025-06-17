@@ -16,6 +16,7 @@ class CotizacionScreen extends StatelessWidget {
           ),
         ],
       ),
+<<<<<<< HEAD
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -63,6 +64,12 @@ class CotizacionScreen extends StatelessWidget {
               ],
             ),
           ],
+=======
+      body: const Center(
+        child: Text(
+          'Pantalla Cotizacion prueba',
+          style: TextStyle(fontSize: 24),
+>>>>>>> c9cadc093bfe3f093a785ec354d74d5bb0c2e382
         ),
       ),
     );
