@@ -12,7 +12,7 @@ class CotizacionNavigation extends StatelessWidget {
       ),
       body: const Center(
         child: Text(
-          'Pantalla Cotizacion',
+          'Pantalla Cotizacion prueba',
           style: TextStyle(fontSize: 24),
         ),
       ),
