@@ -6,38 +6,85 @@ class StockNavigation extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back,
-            color: Colors.white,
-            size: 35,
-          ),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-        title: const Text(
-          'Stock',
-          style: TextStyle(color: Colors.white),
-        ),
-        backgroundColor: const Color(0xFF455A64),
-      ),
-      backgroundColor: const Color(0xFF455A64), // Asegura el fondo oscuro
-      body: const Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
+      body: Stack(
         children: [
-          Center(
-            child: Text(
-              'Pantalla Stock',
-              style: TextStyle(
-                fontSize: 23,
-                color: Colors.white,
+          // Background with wave curve
+          ClipPath(
+            clipper: WaveClipper(),
+            child: Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [Color(0xFF2A4D69), Color(0xFF3C5A74)],
+                ),
               ),
+              height: MediaQuery.of(context).size.height * 0.6,
+            ),
+          ),
+          // Main content
+          SafeArea(
+            child: Column(
+              children: [
+                // AppBar personalizado
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.arrow_back, color: Colors.white, size: 35),
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                      ),
+                      const SizedBox(width: 16),
+                      const Text(
+                        'Stock',
+                        style: TextStyle(color: Colors.white, fontSize: 20),
+                      ),
+                    ],
+                  ),
+                ),
+                const Expanded(
+                  child: Center(
+                    child: Text(
+                      'Pantalla Stock',
+                      style: TextStyle(
+                        fontSize: 23,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ],
       ),
     );
   }
+}
+
+// Custom clipper for the wave effect
+class WaveClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    var path = Path();
+    path.lineTo(0, size.height * 0.8);
+    var firstControlPoint = Offset(size.width / 4, size.height);
+    var firstEndPoint = Offset(size.width / 2, size.height * 0.8);
+    path.quadraticBezierTo(firstControlPoint.dx, firstControlPoint.dy, firstEndPoint.dx, firstEndPoint.dy);
+
+    var secondControlPoint = Offset(size.width * 3 / 4, size.height * 0.6);
+    var secondEndPoint = Offset(size.width, size.height * 0.8);
+    path.quadraticBezierTo(secondControlPoint.dx, secondControlPoint.dy, secondEndPoint.dx, secondEndPoint.dy);
+
+    path.lineTo(size.width, 0);
+    path.close();
+    return path;
+  }
+
+  @override
+  bool shouldReclip(CustomClipper<Path> oldClipper) => false;
 }
