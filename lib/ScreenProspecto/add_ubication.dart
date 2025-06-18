@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class VentNavigation extends StatelessWidget {
-  const VentNavigation({super.key});
+class AddUbication extends StatelessWidget {
+  const AddUbication({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -17,17 +17,25 @@ class VentNavigation extends StatelessWidget {
           },
         ),
         title: const Text(
-          'Venta',
+          'Agregar Nueva Ubicacion',
           style: TextStyle(color: Colors.white),
         ),
         backgroundColor: const Color(0xFF455A64),
       ),
-      backgroundColor: const Color(0xFF455A64), // Asegura el fondo oscuro
+      backgroundColor: const Color(0xFF455A64),
       body: const Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-
+          Center(
+            child: Text(
+              'Agregar Ubicacion',
+              style: TextStyle(
+                fontSize: 23,
+                color: Colors.white,
+              ),
+            ),
+          ),
         ],
       ),
     );

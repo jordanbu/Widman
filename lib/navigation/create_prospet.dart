@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:widmancrm/ScreenProspecto/add_caracteristicas.dart';
+import 'package:widmancrm/ScreenProspecto/add_ubication.dart';
 
 class CreateProspect extends StatelessWidget {
   const CreateProspect({super.key});
@@ -9,14 +11,20 @@ class CreateProspect extends StatelessWidget {
       backgroundColor: Colors.white,
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(Icons.arrow_back,
+              color: Colors.white,
+              size: 35,
+          ),
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
+
           'Registrar Prospecto',
           style: TextStyle(
             color: Colors.white,
+
           ),
+
         ),
         backgroundColor: const Color(0xFF455A64),
         actions: [
@@ -83,7 +91,10 @@ class CreateProspect extends StatelessWidget {
                   onPressed: () {
                     // Agregar otro número
                   },
-                  child: const Icon(Icons.add),
+                  child: const Icon(Icons.add,
+                    color: Colors.white,
+                  ),
+
                 ),
               ],
             ),
@@ -94,9 +105,15 @@ class CreateProspect extends StatelessWidget {
               width: double.infinity,
               child: ElevatedButton.icon(
                 onPressed: () {
-                  // Agregar ubicación
+                  Navigator.push(context,
+                      MaterialPageRoute(builder:
+                          (context)=> AddUbication()));
                 },
-                icon: const Icon(Icons.location_on),
+                icon: const Icon(Icons.location_on,
+                size: 32,
+                  color: Colors.white,
+                ),
+
                 label: const Text(
                   'AGREGAR UBICACIÓN',
                   style: TextStyle(
@@ -116,7 +133,9 @@ class CreateProspect extends StatelessWidget {
               width: double.infinity,
               child: OutlinedButton(
                 onPressed: () {
-                  // Añadir características
+                  Navigator.push(context,
+                  MaterialPageRoute(builder: (context)=> AddCaracteristicas())
+                  );
                 },
                 child: const Text(
                   'AÑADIR CARACTERISTICAS',

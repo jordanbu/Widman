@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class VentNavigation extends StatelessWidget {
-  const VentNavigation({super.key});
+class CuentasPVencer extends StatelessWidget {
+  const CuentasPVencer({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +17,7 @@ class VentNavigation extends StatelessWidget {
           },
         ),
         title: const Text(
-          'Venta',
+          'Cuentas por Vencer',
           style: TextStyle(color: Colors.white),
         ),
         backgroundColor: const Color(0xFF455A64),
@@ -27,7 +27,15 @@ class VentNavigation extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-
+          Center(
+            child: Text(
+              'Pantalla Cuentas por Vencer',
+              style: TextStyle(
+                fontSize: 23,
+                color: Colors.white,
+              ),
+            ),
+          ),
         ],
       ),
     );
