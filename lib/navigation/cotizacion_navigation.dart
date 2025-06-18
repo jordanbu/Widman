@@ -40,19 +40,130 @@ class CotizacionNavigation extends StatelessWidget {
                       ),
                       const SizedBox(width: 16),
                       const Text(
-                        'Cotizacion',
+                        'Cotización',
                         style: TextStyle(color: Colors.white, fontSize: 20),
                       ),
                     ],
                   ),
                 ),
-                const Expanded(
-                  child: Center(
-                    child: Text(
-                      'Pantalla Cotizacion',
-                      style: TextStyle(
-                        fontSize: 23,
-                        color: Colors.white,
+                // Filter bar
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Filtrar',
+                        style: TextStyle(color: Colors.white, fontSize: 16),
+                      ),
+                      Row(
+                        children: [
+                          Container(
+                            width: 60,
+                            child: TextField(
+                              decoration: InputDecoration(
+                                hintText: 'ID',
+                                hintStyle: TextStyle(color: Colors.grey[400]),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                filled: true,
+                                fillColor: Colors.white,
+                              ),
+                              style: const TextStyle(color: Colors.black),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Container(
+                            width: 100,
+                            child: TextField(
+                              decoration: InputDecoration(
+                                hintText: 'Fecha',
+                                hintStyle: TextStyle(color: Colors.grey[400]),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                filled: true,
+                                fillColor: Colors.white,
+                              ),
+                              style: const TextStyle(color: Colors.black),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Container(
+                            width: 100,
+                            child: TextField(
+                              decoration: InputDecoration(
+                                hintText: 'Nombre',
+                                hintStyle: TextStyle(color: Colors.grey[400]),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                filled: true,
+                                fillColor: Colors.white,
+                              ),
+                              style: const TextStyle(color: Colors.black),
+                            ),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.search, color: Colors.white),
+                            onPressed: () {},
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                // List container
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: Card(
+                      elevation: 4,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      color: Colors.white,
+                      child: ListView(
+                        padding: const EdgeInsets.all(16),
+                        children: [
+                          const Text(
+                            'Lista de Cotizaciones',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF455A64),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          ListTile(
+                            leading: const Text('PS0004'),
+                            title: const Text('Didier Rada'),
+                            trailing: const Text('18-06-2025'),
+                            onTap: () {},
+                          ),
+                          const Divider(),
+                          ListTile(
+                            leading: const Text('PS0004'),
+                            title: const Text('Didier Rada'),
+                            trailing: const Text('18-06-2025'),
+                            onTap: () {},
+                          ),
+                          const Divider(),
+                          ListTile(
+                            leading: const Text('PS0004'),
+                            title: const Text('Didier Rada'),
+                            trailing: const Text('18-06-2025'),
+                            onTap: () {},
+                          ),
+                          const Divider(),
+                          ListTile(
+                            leading: const Text('PS0004'),
+                            title: const Text('Didier Rada'),
+                            trailing: const Text('18-06-2025'),
+                            onTap: () {},
+                          ),
+                        ],
                       ),
                     ),
                   ),
@@ -61,6 +172,11 @@ class CotizacionNavigation extends StatelessWidget {
             ),
           ),
         ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {},
+        backgroundColor: const Color(0xFF455A64),
+        child: const Icon(Icons.add, color: Colors.white),
       ),
     );
   }
