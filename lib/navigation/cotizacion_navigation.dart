@@ -92,7 +92,7 @@ class CotizacionNavigation extends StatelessWidget {
                           ),
                           const SizedBox(width: 8),
                           Container(
-                            width: 100,
+                            width: 60,
                             child: TextField(
                               decoration: InputDecoration(
                                 hintText: 'Nombre',
@@ -139,7 +139,7 @@ class CotizacionNavigation extends StatelessWidget {
                           const SizedBox(height: 16),
                           ListTile(
                             leading: const Text('PS0004'),
-                            title: const Text('Didier Rada'),
+                            title: const Text('Prueba'),
                             trailing: const Text('18-06-2025'),
                             onTap: () {},
                           ),
@@ -148,16 +148,23 @@ class CotizacionNavigation extends StatelessWidget {
                           const Divider(),
                           ListTile(
                             leading: const Text('PS0004'),
-                            title: const Text('Didier Rada'),
+                            title: const Text('Prueba'),
                             trailing: const Text('18-06-2025'),
                             onTap: () {},
                           ),
                           const Divider(),
                           ListTile(
                             leading: const Text('PS0004'),
-                            title: const Text('Didier Rada'),
+                            title: const Text('Prueba'),
                             trailing: const Text('18-06-2025'),
                             onTap: () {},
+                          ),
+                          const Divider(),
+                          ListTile(
+                            leading: const Text('PS232'),
+                            title: const Text('Prueba'),
+                            trailing: const Text('15-56-2025'),
+                            onTap: (){},
                           ),
                         ],
                       ),

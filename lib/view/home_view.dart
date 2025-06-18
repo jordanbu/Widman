@@ -21,6 +21,7 @@ class HomeView extends StatelessWidget {
           ClipPath(
             clipper: WaveClipper(),
             child: Container(
+
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
@@ -31,6 +32,7 @@ class HomeView extends StatelessWidget {
               height: MediaQuery.of(context).size.height * 0.6,
             ),
           ),
+
           SafeArea(
             child: Column(
               children: [
@@ -180,6 +182,7 @@ class HomeView extends StatelessWidget {
                 );
               },
             ),
+            const Divider(),
             ListTile(
               title: const Text('Otras Acciones'),
               onTap: () {
