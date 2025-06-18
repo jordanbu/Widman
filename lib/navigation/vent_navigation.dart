@@ -41,22 +41,47 @@ class VentNavigation extends StatelessWidget {
                       const SizedBox(width: 16),
                       const Text(
                         'Ventas',
-                        style: TextStyle(color: Colors.white, fontSize: 20),
+                        style: TextStyle(color: Colors.white, fontSize: 20,
+
+                        ),
                       ),
                     ],
                   ),
                 ),
-                const Expanded(
-                  child: Center(
-                    child: Text(
-                      'Pantalla Venta',
-                      style: TextStyle(
-                        fontSize: 23,
-                        color: Colors.white,
+
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 28.0),
+                    child: Card(
+                      elevation: 4,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      color: Colors.white,
+                      child: ListView(
+                        padding: const EdgeInsets.all(16),
+                        children: [
+                          const Text(
+                            'Venta',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF455A64),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+
+
+
+
+
+                        ],
                       ),
                     ),
                   ),
                 ),
+
               ],
             ),
           ),
