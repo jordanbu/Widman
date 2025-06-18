@@ -126,7 +126,7 @@ class _AgendaState extends State<Agenda> {
                             child: Text(
                               'Detalles para ${_selectedDay!.day}/${_selectedDay!.month}/${_selectedDay!.year}',
                               style: const TextStyle(
-                                fontSize: 16,
+                                fontSize: 14,
                                 color: Color(0xFF455A64),
                               ),
                             ),

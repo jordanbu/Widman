@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:widmancrm/ScreenCotizacion/add_cotizacion.dart';
 
 class CotizacionNavigation extends StatelessWidget {
   const CotizacionNavigation({super.key});
@@ -117,7 +118,7 @@ class CotizacionNavigation extends StatelessWidget {
                 // List container
                 Expanded(
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    padding: const EdgeInsets.symmetric(horizontal: 28.0),
                     child: Card(
                       elevation: 4,
                       shape: RoundedRectangleBorder(
@@ -143,12 +144,7 @@ class CotizacionNavigation extends StatelessWidget {
                             onTap: () {},
                           ),
                           const Divider(),
-                          ListTile(
-                            leading: const Text('PS0004'),
-                            title: const Text('Didier Rada'),
-                            trailing: const Text('18-06-2025'),
-                            onTap: () {},
-                          ),
+
                           const Divider(),
                           ListTile(
                             leading: const Text('PS0004'),
@@ -174,7 +170,12 @@ class CotizacionNavigation extends StatelessWidget {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: () {
+          Navigator.push(context,
+              MaterialPageRoute(builder:
+                  (context)=> AddCotizacion()
+          ));
+        },
         backgroundColor: const Color(0xFF455A64),
         child: const Icon(Icons.add, color: Colors.white),
       ),
