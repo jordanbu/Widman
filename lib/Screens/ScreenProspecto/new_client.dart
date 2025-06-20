@@ -1,8 +1,28 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io'; // Para manejar archivos de imagen
 import 'package:widmancrm/Screens/ScreenProspecto/wave_clipper.dart';
 
-class NewClient extends StatelessWidget {
+class NewClient extends StatefulWidget {
   const NewClient({super.key});
+
+  @override
+  _NewClientState createState() => _NewClientState();
+}
+
+class _NewClientState extends State<NewClient> {
+  File? _image; // Variable para almacenar la imagen seleccionada
+  final ImagePicker _picker = ImagePicker();
+
+  // Función para seleccionar una imagen
+  Future<void> _pickImage() async {
+    final XFile? pickedFile = await _picker.pickImage(source: ImageSource.gallery); // O ImageSource.camera para usar la cámara
+    if (pickedFile != null) {
+      setState(() {
+        _image = File(pickedFile.path);
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -62,17 +82,28 @@ class NewClient extends StatelessWidget {
                           const SizedBox(height: 20),
                           // Circular image placeholder
                           Center(
-                            child: Container(
-                              width: 100,
-                              height: 100,
-                              decoration: const BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: Colors.grey,
-                              ),
-                              child: const Icon(
-                                Icons.camera_alt,
-                                size: 40,
-                                color: Colors.white,
+                            child: GestureDetector(
+                              onTap: _pickImage, // Llama a la función al tocar
+                              child: Container(
+                                width: 100,
+                                height: 100,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: Colors.grey,
+                                  image: _image != null
+                                      ? DecorationImage(
+                                    image: FileImage(_image!),
+                                    fit: BoxFit.cover,
+                                  )
+                                      : null,
+                                ),
+                                child: _image == null
+                                    ? const Icon(
+                                  Icons.camera_alt,
+                                  size: 40,
+                                  color: Colors.white,
+                                )
+                                    : null,
                               ),
                             ),
                           ),
@@ -132,7 +163,6 @@ class NewClient extends StatelessWidget {
                               ),
                               child: const Text(
                                 'Guardar',
-
                                 style: TextStyle(fontSize: 16, color: Colors.white),
                               ),
                             ),
