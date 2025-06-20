@@ -43,14 +43,11 @@ class VentNavigation extends StatelessWidget {
                       const SizedBox(width: 16),
                       const Text(
                         'Ventas',
-                        style: TextStyle(color: Colors.white, fontSize: 20,
-
-                        ),
+                        style: TextStyle(color: Colors.white, fontSize: 20),
                       ),
                     ],
                   ),
                 ),
-
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 28.0),
@@ -64,7 +61,7 @@ class VentNavigation extends StatelessWidget {
                         padding: const EdgeInsets.all(16),
                         children: [
                           const Text(
-                            'Venta',
+                            'Venta de Productos',
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               fontSize: 18,
@@ -73,12 +70,65 @@ class VentNavigation extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(height: 16),
+                          // Search bar and filter
+                          Row(
+                            children: [
+                              Expanded(
+                                child: TextField(
+                                  decoration: InputDecoration(
+                                    hintText: 'Buscar...',
+                                    prefixIcon: const Icon(Icons.search),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide: const BorderSide(
+                                        color: Color(0xFF455A64),
+                                      ),
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide: const BorderSide(
+                                        color: Color(0xFF2A4D69),
+                                        width: 2,
+                                      ),
+                                    ),
+                                    filled: true,
+                                    fillColor: Colors.grey[100],
+                                  ),
+                                  onChanged: (value) {
+                                    // Implement search logic here
+                                  },
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              DropdownButton<String>(
+                                value: 'Nombre',
+                                items: <String>['Nombre', 'Código'].map((String value) {
+                                  return DropdownMenuItem<String>(
+                                    value: value,
+                                    child: Text(value),
+                                  );
+                                }).toList(),
+                                onChanged: (String? newValue) {
+                                  // Implement filter type change logic here
+                                },
+                                style: const TextStyle(
+                                  color: Color(0xFF455A64),
+                                  fontSize: 16,
+                                ),
+                                dropdownColor: Colors.white,
+                                icon: const Icon(Icons.filter_list, color: Color(0xFF2A4D69)),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                          // Add your product list items here
                         ],
                       ),
+
                     ),
+
                   ),
                 ),
-
               ],
             ),
           ),

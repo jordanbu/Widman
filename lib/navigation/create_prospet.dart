@@ -28,9 +28,9 @@ class CreateProspect extends StatelessWidget {
           SafeArea(
             child: Column(
               children: [
-                // AppBar personalizado
+                // Custom AppBar
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12),
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
@@ -43,70 +43,94 @@ class CreateProspect extends StatelessWidget {
                       const SizedBox(width: 16),
                       const Text(
                         'Prospecto',
-                        style: TextStyle(color: Colors.white, fontSize: 20),
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ],
                   ),
                 ),
-
-                TextField(
-                  decoration: InputDecoration(
-                    hintText: 'Nombre del cliente',
-                    prefixIcon: const Icon(Icons.search),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(
-                        color: Color(0xFF455A64),
+                // Search Bar
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                  child: TextField(
+                    decoration: InputDecoration(
+                      hintText: 'Buscar cliente...',
+                      hintStyle: TextStyle(color: Colors.grey[600]),
+                      prefixIcon: const Icon(Icons.search, color: Color(0xFF455A64)),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide.none,
                       ),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(30),
-                      borderSide: const BorderSide(
-                        color: Color(0xFF2A4D69),
-                        width: 2,
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide.none,
                       ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(
+                          color: Color(0xFF2A4D69),
+                          width: 2,
+                        ),
+                      ),
+                      filled: true,
+                      fillColor: Colors.grey[200],
+                      contentPadding: const EdgeInsets.symmetric(vertical: 14.0),
                     ),
-                    filled: true,
-                    fillColor: Colors.grey[100],
+                    onChanged: (value) {
+                      // Implement search logic here
+                      // Example: Filter client list based on 'value'
+                    },
                   ),
-
-                  onChanged: (value) {
-                    // Implement search logic here
-
-                  },
-
                 ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text('Todos',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 18
-                    ),
-                    ),
-                    const Expanded(child: SizedBox()),
-                    const Text('Nombre',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 18
-                    ),
-                    ),
-                    const Expanded(child: SizedBox()),
-                    const Text('Razon Social',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                    ),
-                    ),
-
-                  ],
-
+                // Filter Labels
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          'Todos',
+                          textAlign: TextAlign.left,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: Text(
+                          'Nombre',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: Text(
+                          'Razón Social',
+                          textAlign: TextAlign.right,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
+                // Client List
                 Expanded(
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 28.0),
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
                     child: Card(
                       elevation: 4,
                       shape: RoundedRectangleBorder(
@@ -125,13 +149,16 @@ class CreateProspect extends StatelessWidget {
                               color: Color(0xFF455A64),
                             ),
                           ),
-                          const SizedBox(height: 16),
+                          Text('data'),
+                          Text('data2'),
+                          Text('data3'),
+                          Text('data4'),
                           const SizedBox(height: 16),
                           // Add your client list items here
                         ],
+
                       ),
                     ),
-
                   ),
 
                 ),
@@ -145,12 +172,13 @@ class CreateProspect extends StatelessWidget {
               alignment: Alignment.bottomRight,
               child: FloatingActionButton(
                 onPressed: () {
-                  // Navigate to add new client screen
-                  Navigator.push(context, MaterialPageRoute(builder: (context)=> NewClient()));
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const NewClient()),
+                  );
                 },
                 backgroundColor: const Color(0xFF2A4D69),
                 child: const Icon(Icons.add, color: Colors.white),
-
               ),
             ),
           ),
