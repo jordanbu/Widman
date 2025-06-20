@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:widmancrm/ScreenProspecto/add_caracteristicas.dart';
 import 'package:widmancrm/ScreenProspecto/add_ubication.dart';
+import 'package:widmancrm/ScreenProspecto/new_client.dart';
 
 class CreateProspect extends StatelessWidget {
   const CreateProspect({super.key});
@@ -32,127 +32,93 @@ class CreateProspect extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       IconButton(
                         icon: const Icon(Icons.arrow_back, color: Colors.white, size: 35),
-                        onPressed: () => Navigator.pop(context),
-                      ),
-                      const Text(
-                        'Registrar Prospecto',
-                        style: TextStyle(color: Colors.white, fontSize: 20),
-                      ),
-                      TextButton(
                         onPressed: () {
-                          // Acción de guardar
+                          Navigator.pop(context);
                         },
-                        child: const Text(
-                          'GUARDAR',
-                          style: TextStyle(
-                            color: Colors.red,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      const Text(
+                        'Prospecto',
+                        style: TextStyle(color: Colors.white, fontSize: 20),
                       ),
                     ],
                   ),
                 ),
                 Expanded(
                   child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      children: [
-                        // Campo Nombre
-                        TextField(
-                          decoration: InputDecoration(
-                            prefixIcon: const Icon(Icons.person),
-                            labelText: 'Nombre',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
+                    padding: const EdgeInsets.symmetric(horizontal: 28.0),
+                    child: Card(
+                      elevation: 4,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      color: Colors.white,
+                      child: ListView(
+                        padding: const EdgeInsets.all(16),
+                        children: [
+                          const Text(
+                            'Lista de Clientes',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF455A64),
                             ),
                           ),
-                        ),
-                        const SizedBox(height: 16),
-                        // Campo Razón Social
-                        TextField(
-                          decoration: InputDecoration(
-                            prefixIcon: const Icon(Icons.groups),
-                            labelText: 'Razón Social',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        // Campo Teléfono con botón "+"
-                        Row(
-                          children: [
-                            Expanded(
-                              child: TextField(
-                                decoration: InputDecoration(
-                                  prefixIcon: const Icon(Icons.phone),
-                                  labelText: 'Teléfono',
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
+                          const SizedBox(height: 16),
+                          // Search bar
+                          TextField(
+                            decoration: InputDecoration(
+                              hintText: 'Nombre del cliente',
+                              prefixIcon: const Icon(Icons.search),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: const BorderSide(
+                                  color: Color(0xFF455A64),
                                 ),
                               ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: const BorderSide(
+                                  color: Color(0xFF2A4D69),
+                                  width: 2,
+                                ),
+                              ),
+                              filled: true,
+                              fillColor: Colors.grey[100],
                             ),
-                            const SizedBox(width: 8),
-                            FloatingActionButton(
-                              mini: true,
-                              backgroundColor: Colors.red,
-                              onPressed: () {
-                                // Agregar otro número
-                              },
-                              child: const Icon(Icons.add, color: Colors.white),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-                        // Botón Agregar Ubicación
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton.icon(
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(builder: (context) => AddUbication()),
-                              );
+                            onChanged: (value) {
+                              // Implement search logic here
                             },
-                            icon: const Icon(Icons.location_on, size: 32, color: Colors.white),
-                            label: const Text(
-                              'AGREGAR UBICACIÓN',
-                              style: TextStyle(color: Colors.white),
-                            ),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.red,
-                              padding: const EdgeInsets.symmetric(vertical: 16),
-                            ),
                           ),
-                        ),
-                        const SizedBox(height: 8),
-                        // Botón Añadir Características
-                        SizedBox(
-                          width: double.infinity,
-                          child: OutlinedButton(
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(builder: (context) => AddCaracteristicas()),
-                              );
-                            },
-                            child: const Text(
-                              'AÑADIR CARACTERISTICAS',
-                              style: TextStyle(color: Colors.black),
-                            ),
-                          ),
-                        ),
-                      ],
+                          const SizedBox(height: 16),
+                          // Add your client list items here
+                        ],
+                      ),
                     ),
                   ),
                 ),
               ],
+            ),
+          ),
+          // Floating Action Button
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Align(
+              alignment: Alignment.bottomRight,
+              child: FloatingActionButton(
+                onPressed: () {
+                  // Navigate to add new client screen
+                  Navigator.push(context, MaterialPageRoute(builder: (context)=> NewClient()));
+                },
+                backgroundColor: const Color(0xFF2A4D69),
+                child: const Icon(Icons.add, color: Colors.white),
+
+              ),
             ),
           ),
         ],

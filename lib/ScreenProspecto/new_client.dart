@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class PizarraVirtual extends StatelessWidget {
-  const PizarraVirtual({super.key});
+class NewClient extends StatelessWidget {
+  const NewClient({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +40,7 @@ class PizarraVirtual extends StatelessWidget {
                       ),
                       const SizedBox(width: 16),
                       const Text(
-                        'Pizarra Virtual',
+                        'Agregar Nuevo Cliente',
                         style: TextStyle(color: Colors.white, fontSize: 20,
 
                         ),
@@ -62,7 +62,7 @@ class PizarraVirtual extends StatelessWidget {
                         padding: const EdgeInsets.all(16),
                         children: [
                           const Text(
-                            'Pizarra',
+                            'Cliente',
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               fontSize: 18,

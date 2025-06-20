@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:widmancrm/view/inicio_view.dart';
-import 'login_view.dart';
 
 class SplashView extends StatefulWidget {
   const SplashView({super.key});
@@ -18,7 +17,7 @@ class _SplashViewState extends State<SplashView> {
       Navigator.pushReplacement(
         context,
         PageRouteBuilder(
-          pageBuilder: (_, __, ___) => InicioView(),
+          pageBuilder: (_, __, ___) => const InicioView(),
           transitionsBuilder: (_, animation, __, child) {
             return FadeTransition(
               opacity: animation,
@@ -34,55 +33,30 @@ class _SplashViewState extends State<SplashView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
-        children: [
-          // Background with wave curve
-          ClipPath(
-            clipper: WaveClipper(),
-            child: Container(
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [Color(0xFF2A4D69), Color(0xFF3C5A74)],
+      body: Container(
+        color: const Color(0xFF2A4D69), // Azul uniforme para todo el fondo
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Image.asset(
+                'assets/logo_singleton.png',
+                height: 190,
+                width: 190,
+              ),
+              const SizedBox(height: 16), // Espacio entre imagen y texto
+              const Text(
+                'Tecnología que te libera',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w400,
                 ),
               ),
-              height: MediaQuery.of(context).size.height * 0.6,
-            ),
+            ],
           ),
-          // Main content
-          Center(
-            child: Image.asset(
-              'assets/logo_singleton.png',
-              height: 190,
-              width: 190,
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
-}
-
-// Custom clipper for the wave effect
-class WaveClipper extends CustomClipper<Path> {
-  @override
-  Path getClip(Size size) {
-    var path = Path();
-    path.lineTo(0, size.height * 0.8);
-    var firstControlPoint = Offset(size.width / 4, size.height);
-    var firstEndPoint = Offset(size.width / 2, size.height * 0.8);
-    path.quadraticBezierTo(firstControlPoint.dx, firstControlPoint.dy, firstEndPoint.dx, firstEndPoint.dy);
-
-    var secondControlPoint = Offset(size.width * 3 / 4, size.height * 0.6);
-    var secondEndPoint = Offset(size.width, size.height * 0.8);
-    path.quadraticBezierTo(secondControlPoint.dx, secondControlPoint.dy, secondEndPoint.dx, secondEndPoint.dy);
-
-    path.lineTo(size.width, 0);
-    path.close();
-    return path;
-  }
-
-  @override
-  bool shouldReclip(CustomClipper<Path> oldClipper) => false;
 }

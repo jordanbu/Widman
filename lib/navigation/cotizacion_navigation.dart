@@ -6,6 +6,8 @@ class CotizacionNavigation extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+
     return Scaffold(
       body: Stack(
         children: [
@@ -47,78 +49,68 @@ class CotizacionNavigation extends StatelessWidget {
                     ],
                   ),
                 ),
-                // Filter bar
+                // Filter Section
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       const Text(
-                        'Filtrar',
+                        'Filtrar:',
                         style: TextStyle(color: Colors.white, fontSize: 16),
                       ),
                       Row(
                         children: [
-                          Container(
-                            width: 60,
-                            child: TextField(
-                              decoration: InputDecoration(
-                                hintText: 'ID',
-                                hintStyle: TextStyle(color: Colors.grey[400]),
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                filled: true,
-                                fillColor: Colors.white,
-                              ),
-                              style: const TextStyle(color: Colors.black),
-                            ),
+                          FilterChip(
+                            label: const Text('ID'),
+                            onSelected: (bool value) {},
+                            selected: false,
+                            backgroundColor: Colors.white,
+                            labelStyle: const TextStyle(color: Color(0xFF2A4D69)),
                           ),
                           const SizedBox(width: 8),
-                          Container(
-                            width: 100,
-                            child: TextField(
-                              decoration: InputDecoration(
-                                hintText: 'Fecha',
-                                hintStyle: TextStyle(color: Colors.grey[400]),
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                filled: true,
-                                fillColor: Colors.white,
-                              ),
-                              style: const TextStyle(color: Colors.black),
-                            ),
+                          FilterChip(
+                            label: const Text('Fecha'),
+                            onSelected: (bool value) {},
+                            selected: false,
+                            backgroundColor: Colors.white,
+                            labelStyle: const TextStyle(color: Color(0xFF2A4D69)),
                           ),
                           const SizedBox(width: 8),
-                          Container(
-                            width: 60,
-                            child: TextField(
-                              decoration: InputDecoration(
-                                hintText: 'Nombre',
-                                hintStyle: TextStyle(color: Colors.grey[400]),
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                filled: true,
-                                fillColor: Colors.white,
-                              ),
-                              style: const TextStyle(color: Colors.black),
-                            ),
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.search, color: Colors.white),
-                            onPressed: () {},
+                          FilterChip(
+                            label: const Text('Nombre'),
+                            onSelected: (bool value) {},
+                            selected: false,
+                            backgroundColor: Colors.white,
+                            labelStyle: const TextStyle(color: Color(0xFF2A4D69)),
                           ),
                         ],
                       ),
                     ],
                   ),
                 ),
-                // List container
+                // Search Bar
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                  child: TextField(
+                    decoration: InputDecoration(
+                      hintText: 'ID , Fecha , Nombre ',
+                      prefixIcon: const Icon(Icons.search, color: Color(0xFF455A64)),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      filled: true,
+                      fillColor: Colors.white,
+                    ),
+                    onChanged: (value) {
+                      // Add search logic here
+                    },
+                  ),
+                ),
+                // List of Quotations
                 Expanded(
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 28.0),
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
                     child: Card(
                       elevation: 4,
                       shape: RoundedRectangleBorder(
@@ -130,6 +122,7 @@ class CotizacionNavigation extends StatelessWidget {
                         children: [
                           const Text(
                             'Lista de Cotizaciones',
+                            textAlign: TextAlign.center,
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
@@ -138,33 +131,27 @@ class CotizacionNavigation extends StatelessWidget {
                           ),
                           const SizedBox(height: 16),
                           ListTile(
-                            leading: const Text('PS0004'),
-                            title: const Text('Prueba'),
-                            trailing: const Text('18-06-2025'),
-                            onTap: () {},
-                          ),
-                          const Divider(),
-
-                          const Divider(),
-                          ListTile(
-                            leading: const Text('PS0004'),
-                            title: const Text('Prueba'),
-                            trailing: const Text('18-06-2025'),
-                            onTap: () {},
+                            leading: const Text('001'),
+                            title: const Text('Lubricante de FREBA'),
+                            subtitle: const Text('10-06-2025'),
                           ),
                           const Divider(),
                           ListTile(
-                            leading: const Text('PS0004'),
-                            title: const Text('Prueba'),
-                            trailing: const Text('18-06-2025'),
-                            onTap: () {},
+                            leading: const Text('002'),
+                            title: const Text('Lubricante de FREBA'),
+                            subtitle: const Text('10-06-2025'),
                           ),
                           const Divider(),
                           ListTile(
-                            leading: const Text('PS232'),
-                            title: const Text('Prueba'),
-                            trailing: const Text('15-56-2025'),
-                            onTap: (){},
+                            leading: const Text('003'),
+                            title: const Text('Lubricante de FREBA'),
+                            subtitle: const Text('10-06-2025'),
+                          ),
+                          const Divider(),
+                          ListTile(
+                            leading: const Text('004'),
+                            title: const Text('Lubricante de FREBA'),
+                            subtitle: const Text('10-06-2025'),
                           ),
                         ],
                       ),
@@ -178,12 +165,12 @@ class CotizacionNavigation extends StatelessWidget {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Navigator.push(context,
-              MaterialPageRoute(builder:
-                  (context)=> AddCotizacion()
-          ));
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const AddCotizacion()),
+          );
         },
-        backgroundColor: const Color(0xFF455A64),
+        backgroundColor: const Color(0xFF2A4D69),
         child: const Icon(Icons.add, color: Colors.white),
       ),
     );
