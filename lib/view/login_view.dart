@@ -6,6 +6,8 @@ import '../view/Login/wave_clipper.dart';
 class LoginView extends StatelessWidget {
   final controller = LoginController();
 
+  LoginView({super.key});
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
@@ -53,7 +55,7 @@ class LoginView extends StatelessWidget {
                               color: Color(0xFF2A4D69),
                             ),
                           ),
-                          const SizedBox(height: 40),
+                          const SizedBox(height: 70),
 
                           // Campo usuario
                           TextField(
@@ -66,10 +68,10 @@ class LoginView extends StatelessWidget {
                           TextField(
                             controller: controller.passwordController,
                             obscureText: true,
-                            decoration: _buildInputDecoration('Contraseña'),
+                            decoration: _buildInputDecoration('Contraseña',
+                            ),
                           ),
                           const SizedBox(height: 30),
-
                           // Botón ingresar
                           SizedBox(
                             width: double.infinity,
@@ -77,7 +79,7 @@ class LoginView extends StatelessWidget {
                               style: ElevatedButton.styleFrom(
                                 padding: const EdgeInsets.symmetric(vertical: 16),
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
+                                  borderRadius: BorderRadius.circular(30),
                                 ),
                                 backgroundColor: const Color(0xFF3C5A74),
                                 elevation: 4,

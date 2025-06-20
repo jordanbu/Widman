@@ -43,16 +43,16 @@ class InicioView extends StatelessWidget {
                               fit: BoxFit.contain,
                             ),
                           ),
-                          const SizedBox(height: 20),
+                          const SizedBox(height: 150),
                           const Text(
-                            '¡Bienvenido!',
+                            'Bienvenido!',
                             style: TextStyle(
                               fontSize: 24,
                               color: Color(0xFF2A4D69),
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                          const SizedBox(height: 30),
+                          const SizedBox(height: 20),
 
                           // Botón crear cuenta
                           SizedBox(
@@ -69,10 +69,10 @@ class InicioView extends StatelessWidget {
                                 foregroundColor: Colors.white,
                                 padding: const EdgeInsets.symmetric(vertical: 16),
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
+                                  borderRadius: BorderRadius.circular(30),
                                 ),
                               ),
-                              child: const Text('Crear una cuenta'),
+                              child: const Text('Iniciar Sesion'),
                             ),
                           ),
                           const SizedBox(height: 20),
@@ -87,7 +87,7 @@ class InicioView extends StatelessWidget {
                                 foregroundColor: const Color(0xFF2A4D69),
                                 padding: const EdgeInsets.symmetric(vertical: 16),
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
+                                  borderRadius: BorderRadius.circular(30),
                                 ),
                                 side: const BorderSide(color: Color(0xFF2A4D69), width: 1.5),
                               ),

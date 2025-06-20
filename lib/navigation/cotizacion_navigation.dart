@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:widmancrm/ScreenCotizacion/add_cotizacion.dart';
+
+import '../Screens/ScreenCotizacion/add_cotizacion.dart';
 
 class CotizacionNavigation extends StatelessWidget {
   const CotizacionNavigation({super.key});
@@ -36,7 +37,7 @@ class CotizacionNavigation extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       IconButton(
-                        icon: const Icon(Icons.arrow_back, color: Colors.white, size: 35),
+                        icon: const Icon(Icons.menu, color: Colors.white, size: 35),
                         onPressed: () {
                           Navigator.pop(context);
                         },

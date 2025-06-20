@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:widmancrm/ScreenProspecto/add_ubication.dart';
-import 'package:widmancrm/ScreenProspecto/new_client.dart';
+import 'package:widmancrm/Screens/ScreenProspecto/new_client.dart';
+import 'package:widmancrm/Screens/ScreenProspecto/wave_clipper.dart';
 
 class CreateProspect extends StatelessWidget {
   const CreateProspect({super.key});
@@ -35,7 +35,7 @@ class CreateProspect extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       IconButton(
-                        icon: const Icon(Icons.arrow_back, color: Colors.white, size: 35),
+                        icon: const Icon(Icons.menu, color: Colors.white, size: 35),
                         onPressed: () {
                           Navigator.pop(context);
                         },
@@ -47,6 +47,62 @@ class CreateProspect extends StatelessWidget {
                       ),
                     ],
                   ),
+                ),
+
+                TextField(
+                  decoration: InputDecoration(
+                    hintText: 'Nombre del cliente',
+                    prefixIcon: const Icon(Icons.search),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(
+                        color: Color(0xFF455A64),
+                      ),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(30),
+                      borderSide: const BorderSide(
+                        color: Color(0xFF2A4D69),
+                        width: 2,
+                      ),
+                    ),
+                    filled: true,
+                    fillColor: Colors.grey[100],
+                  ),
+
+                  onChanged: (value) {
+                    // Implement search logic here
+
+                  },
+
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text('Todos',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18
+                    ),
+                    ),
+                    const Expanded(child: SizedBox()),
+                    const Text('Nombre',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18
+                    ),
+                    ),
+                    const Expanded(child: SizedBox()),
+                    const Text('Razon Social',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                    ),
+                    ),
+
+                  ],
+
                 ),
                 Expanded(
                   child: Padding(
@@ -62,7 +118,7 @@ class CreateProspect extends StatelessWidget {
                         children: [
                           const Text(
                             'Lista de Clientes',
-                            textAlign: TextAlign.center,
+                            textAlign: TextAlign.left,
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
@@ -70,37 +126,14 @@ class CreateProspect extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(height: 16),
-                          // Search bar
-                          TextField(
-                            decoration: InputDecoration(
-                              hintText: 'Nombre del cliente',
-                              prefixIcon: const Icon(Icons.search),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(
-                                  color: Color(0xFF455A64),
-                                ),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(
-                                  color: Color(0xFF2A4D69),
-                                  width: 2,
-                                ),
-                              ),
-                              filled: true,
-                              fillColor: Colors.grey[100],
-                            ),
-                            onChanged: (value) {
-                              // Implement search logic here
-                            },
-                          ),
                           const SizedBox(height: 16),
                           // Add your client list items here
                         ],
                       ),
                     ),
+
                   ),
+
                 ),
               ],
             ),
@@ -125,27 +158,4 @@ class CreateProspect extends StatelessWidget {
       ),
     );
   }
-}
-
-// Custom clipper for the wave effect
-class WaveClipper extends CustomClipper<Path> {
-  @override
-  Path getClip(Size size) {
-    var path = Path();
-    path.lineTo(0, size.height * 0.8);
-    var firstControlPoint = Offset(size.width / 4, size.height);
-    var firstEndPoint = Offset(size.width / 2, size.height * 0.8);
-    path.quadraticBezierTo(firstControlPoint.dx, firstControlPoint.dy, firstEndPoint.dx, firstEndPoint.dy);
-
-    var secondControlPoint = Offset(size.width * 3 / 4, size.height * 0.6);
-    var secondEndPoint = Offset(size.width, size.height * 0.8);
-    path.quadraticBezierTo(secondControlPoint.dx, secondControlPoint.dy, secondEndPoint.dx, secondEndPoint.dy);
-
-    path.lineTo(size.width, 0);
-    path.close();
-    return path;
-  }
-
-  @override
-  bool shouldReclip(CustomClipper<Path> oldClipper) => false;
 }

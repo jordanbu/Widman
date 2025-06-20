@@ -8,7 +8,7 @@ plugins {
 android {
     namespace = "com.widmancrm.widmancrm"
     compileSdk = flutter.compileSdkVersion
-    ndkVersion = "29.0.13599879"
+    ndkVersion = "26.3.11579264"
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
