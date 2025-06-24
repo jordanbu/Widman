@@ -64,10 +64,10 @@ class _HomeViewState extends State<HomeView> {
                           onPressed: () => Scaffold.of(context).openDrawer(),
                         ),
                       ),
-                      const Text(
-                        'Clientes',
-                        style: TextStyle(color: Colors.white, fontSize: 20),
-                      ),
+                      Icon(
+                        Icons.add_alert,
+                        color: Colors.white,
+                      )
                     ],
                   ),
                 ),

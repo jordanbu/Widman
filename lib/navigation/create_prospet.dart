@@ -24,12 +24,17 @@ class _CreateProspectState extends State<CreateProspect> {
     _futureProspectos = _apiService.fetchProspectos();
   }
 
+  void _refreshList() {
+    setState(() {
+      _futureProspectos = _apiService.fetchProspectos();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(
         children: [
-          // Fondo decorativo
           ClipPath(
             clipper: WaveClipper(),
             child: Container(
@@ -43,12 +48,9 @@ class _CreateProspectState extends State<CreateProspect> {
               ),
             ),
           ),
-
-          // Contenido principal
           SafeArea(
             child: Column(
               children: [
-                // AppBar personalizado
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
                   child: Row(
@@ -65,8 +67,6 @@ class _CreateProspectState extends State<CreateProspect> {
                     ],
                   ),
                 ),
-
-                // Buscador
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   child: TextField(
@@ -87,7 +87,6 @@ class _CreateProspectState extends State<CreateProspect> {
                     },
                   ),
                 ),
-                // Filtros
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Row(
@@ -115,8 +114,6 @@ class _CreateProspectState extends State<CreateProspect> {
                     }).toList(),
                   ),
                 ),
-
-                // Lista de prospectos
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -154,14 +151,14 @@ class _CreateProspectState extends State<CreateProspect> {
                               return ListTile(
                                 leading: CircleAvatar(
                                   backgroundColor: const Color(0xFF2A4D69),
-                                  child: Text(p.idProspecto.toString(),
-                                      style: const TextStyle(color: Colors.white)),
+                                  child: Text(
+                                    p.idProspecto.toString(),
+                                    style: const TextStyle(color: Colors.white),
+                                  ),
                                 ),
                                 title: Text(p.nombre),
                                 subtitle: Text('ID: ${p.idProspecto}'),
-                                onTap: () {
-                                  // Acción al seleccionar un prospecto
-                                },
+                                onTap: () {},
                               );
                             },
                           );
@@ -173,20 +170,21 @@ class _CreateProspectState extends State<CreateProspect> {
               ],
             ),
           ),
-
-          // FAB para agregar nuevo prospecto
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Align(
               alignment: Alignment.bottomRight,
               child: FloatingActionButton(
                 backgroundColor: const Color(0xFF2A4D69),
-                child: const Icon(Icons.add),
-                onPressed: () {
-                  Navigator.push(
+                child: const Icon(Icons.add,
+                color: Colors.white,
+                ),
+                onPressed: () async {
+                  final result = await Navigator.push(
                     context,
                     MaterialPageRoute(builder: (_) => const NewClient()),
                   );
+                  if (result == true) _refreshList();
                 },
               ),
             ),

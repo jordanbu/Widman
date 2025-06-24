@@ -1,6 +1,7 @@
 // services/api_service.dart
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:widmancrm/models/almacen_model.dart';
 
 import '../models/cliente_model.dart';
 import '../models/cotizacion_model.dart';
@@ -50,12 +51,14 @@ class ApiService {
     try {
       final response = await http.post(
         url,
-        headers: {'Content-Type': 'application/json; charset=utf-8'},
-        body: jsonEncode({'Datos': jsonEncode(prospectoData)}),
+        headers: {
+          'Content-Type': 'application/json; charset=utf-8',
+        },
+        body: jsonEncode(jsonEncode(prospectoData)), // Doble encode
       );
 
       if (response.statusCode == 200) {
-        return int.parse(response.body); // Retorna el ID del prospecto
+        return int.parse(response.body);
       } else {
         throw Exception('Error al registrar prospecto: ${response.statusCode}');
       }
@@ -63,6 +66,7 @@ class ApiService {
       throw Exception('Error de conexión al registrar prospecto: $e');
     }
   }
+
 
   //Metodos get
   Future<List<Cliente>> fetchClientes() async {
@@ -105,4 +109,5 @@ class ApiService {
       throw Exception('Error al cargar ventas: ${response.statusCode}');
     }
   }
+  //GET
 }

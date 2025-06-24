@@ -21,6 +21,10 @@ class _CotizacionNavigationState extends State<CotizacionNavigation> {
   @override
   void initState() {
     super.initState();
+    _loadCotizaciones();
+  }
+
+  void _loadCotizaciones() {
     _futureCotizaciones = _apiService.fetchCotizaciones();
   }
 
@@ -164,11 +168,17 @@ class _CotizacionNavigationState extends State<CotizacionNavigation> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
+        onPressed: () async {
+          final result = await Navigator.push(
             context,
             MaterialPageRoute(builder: (_) => const AddCotizacion()),
           );
+
+          if (result == true) {
+            setState(() {
+              _loadCotizaciones();
+            });
+          }
         },
         backgroundColor: const Color(0xFF2A4D69),
         child: const Icon(Icons.add, color: Colors.white),

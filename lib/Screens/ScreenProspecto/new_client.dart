@@ -37,7 +37,6 @@ class _NewClientState extends State<NewClient> {
         'RazonSocial': _razonSocialController.text.trim(),
         'Telefono': _telefonoController.text.trim(),
         'Segmento': _segmentoController.text.trim(),
-        // Nota: La imagen no se incluye porque el endpoint no la soporta
       };
 
       try {
@@ -45,7 +44,7 @@ class _NewClientState extends State<NewClient> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Prospecto registrado con ID: $id')),
         );
-        Navigator.pop(context, true); // Regresa con un indicador de éxito
+        Navigator.pop(context, true);
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error: $e')),
@@ -87,7 +86,6 @@ class _NewClientState extends State<NewClient> {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       IconButton(
                         icon: const Icon(Icons.arrow_back, color: Colors.white, size: 35),
@@ -109,7 +107,6 @@ class _NewClientState extends State<NewClient> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
                       ),
-                      color: Colors.white,
                       child: Form(
                         key: _formKey,
                         child: ListView(
@@ -133,11 +130,7 @@ class _NewClientState extends State<NewClient> {
                                         : null,
                                   ),
                                   child: _image == null
-                                      ? const Icon(
-                                    Icons.camera_alt,
-                                    size: 40,
-                                    color: Colors.white,
-                                  )
+                                      ? const Icon(Icons.camera_alt, size: 40, color: Colors.white)
                                       : null,
                                 ),
                               ),
@@ -177,6 +170,16 @@ class _NewClientState extends State<NewClient> {
                                 ),
                               ),
                               keyboardType: TextInputType.phone,
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Campo requerido';
+                                }
+                                final regex = RegExp(r'^[0-9]+$');
+                                if (!regex.hasMatch(value)) {
+                                  return 'Solo se permiten números';
+                                }
+                                return null;
+                              },
                             ),
                             const SizedBox(height: 16),
                             const Text('Segmento:', style: TextStyle(fontSize: 16)),
