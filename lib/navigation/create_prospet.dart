@@ -1,19 +1,39 @@
 import 'package:flutter/material.dart';
-import 'package:widmancrm/Screens/ScreenProspecto/new_client.dart';
+import 'package:widmancrm/api/api_service.dart';
+import 'package:widmancrm/models/prospecto_model.dart';
 import 'package:widmancrm/Screens/ScreenProspecto/wave_clipper.dart';
+import 'package:widmancrm/Screens/ScreenProspecto/new_client.dart';
 
-class CreateProspect extends StatelessWidget {
+class CreateProspect extends StatefulWidget {
   const CreateProspect({super.key});
+
+  @override
+  _CreateProspectState createState() => _CreateProspectState();
+}
+
+class _CreateProspectState extends State<CreateProspect> {
+  final ApiService _apiService = ApiService();
+  late Future<List<Prospecto>> _futureProspectos;
+
+  String _searchQuery = '';
+  String _selectedFilter = 'All';
+
+  @override
+  void initState() {
+    super.initState();
+    _futureProspectos = _apiService.fetchProspectos();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(
         children: [
-          // Background with wave curve
+          // Fondo decorativo
           ClipPath(
             clipper: WaveClipper(),
             child: Container(
+              height: MediaQuery.of(context).size.height * 0.5,
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
@@ -21,164 +41,153 @@ class CreateProspect extends StatelessWidget {
                   colors: [Color(0xFF2A4D69), Color(0xFF3C5A74)],
                 ),
               ),
-              height: MediaQuery.of(context).size.height * 0.6,
             ),
           ),
-          // Main content
+
+          // Contenido principal
           SafeArea(
             child: Column(
               children: [
-                // Custom AppBar
+                // AppBar personalizado
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       IconButton(
-                        icon: const Icon(Icons.menu, color: Colors.white, size: 35),
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
+                        icon: const Icon(Icons.arrow_back, color: Colors.white, size: 30),
+                        onPressed: () => Navigator.pop(context),
                       ),
                       const SizedBox(width: 16),
                       const Text(
-                        'Prospecto',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
+                        'Prospectos',
+                        style: TextStyle(color: Colors.white, fontSize: 20),
                       ),
                     ],
                   ),
                 ),
-                // Search Bar
+
+                // Buscador
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   child: TextField(
                     decoration: InputDecoration(
-                      hintText: 'Buscar cliente...',
-                      hintStyle: TextStyle(color: Colors.grey[600]),
-                      prefixIcon: const Icon(Icons.search, color: Color(0xFF455A64)),
+                      hintText: 'Buscar prospecto...',
+                      prefixIcon: const Icon(Icons.search),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide.none,
                       ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide.none,
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(
-                          color: Color(0xFF2A4D69),
-                          width: 2,
-                        ),
-                      ),
                       filled: true,
                       fillColor: Colors.grey[200],
-                      contentPadding: const EdgeInsets.symmetric(vertical: 14.0),
                     ),
                     onChanged: (value) {
-                      // Implement search logic here
-                      // Example: Filter client list based on 'value'
+                      setState(() {
+                        _searchQuery = value;
+                      });
                     },
                   ),
                 ),
-                // Filter Labels
+                // Filtros
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                  padding: const EdgeInsets.all(8.0),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          'Todos',
-                          textAlign: TextAlign.left,
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
+                    children: ['All', 'Name', 'ID'].map((filter) {
+                      return ElevatedButton(
+                        onPressed: () {
+                          setState(() {
+                            _selectedFilter = filter;
+                          });
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: _selectedFilter == filter
+                              ? const Color(0xFF2A4D69)
+                              : Colors.grey[300],
+                          foregroundColor: _selectedFilter == filter
+                              ? Colors.white
+                              : const Color(0xFF455A64),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-                      ),
-                      Expanded(
-                        child: Text(
-                          'Nombre',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        child: Text(
-                          'Razón Social',
-                          textAlign: TextAlign.right,
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    ],
+                        child: Text(filter == 'All' ? 'Todos' : filter),
+                      );
+                    }).toList(),
                   ),
                 ),
-                // Client List
+
+                // Lista de prospectos
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
                     child: Card(
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                       elevation: 4,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      color: Colors.white,
-                      child: ListView(
-                        padding: const EdgeInsets.all(16),
-                        children: [
-                          const Text(
-                            'Lista de Clientes',
-                            textAlign: TextAlign.left,
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xFF455A64),
-                            ),
-                          ),
-                          Text('data'),
-                          Text('data2'),
-                          Text('data3'),
-                          Text('data4'),
-                          const SizedBox(height: 16),
-                          // Add your client list items here
-                        ],
+                      child: FutureBuilder<List<Prospecto>>(
+                        future: _futureProspectos,
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState == ConnectionState.waiting) {
+                            return const Center(child: CircularProgressIndicator());
+                          } else if (snapshot.hasError) {
+                            return Center(child: Text('Error: ${snapshot.error}'));
+                          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                            return const Center(child: Text('No hay clientes disponibles.'));
+                          }
 
+                          final all = snapshot.data!;
+                          final q = _searchQuery.toLowerCase();
+
+                          final filtered = all.where((p) {
+                            if (_selectedFilter == 'Name') {
+                              return p.nombre.toLowerCase().contains(q);
+                            } else if (_selectedFilter == 'ID') {
+                              return p.idProspecto.toString().contains(q);
+                            }
+                            return p.nombre.toLowerCase().contains(q) ||
+                                p.idProspecto.toString().contains(q);
+                          }).toList();
+
+                          return ListView.builder(
+                            itemCount: filtered.length,
+                            itemBuilder: (context, i) {
+                              final p = filtered[i];
+                              return ListTile(
+                                leading: CircleAvatar(
+                                  backgroundColor: const Color(0xFF2A4D69),
+                                  child: Text(p.idProspecto.toString(),
+                                      style: const TextStyle(color: Colors.white)),
+                                ),
+                                title: Text(p.nombre),
+                                subtitle: Text('ID: ${p.idProspecto}'),
+                                onTap: () {
+                                  // Acción al seleccionar un prospecto
+                                },
+                              );
+                            },
+                          );
+                        },
                       ),
                     ),
                   ),
-
                 ),
               ],
             ),
           ),
-          // Floating Action Button
+
+          // FAB para agregar nuevo prospecto
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Align(
               alignment: Alignment.bottomRight,
               child: FloatingActionButton(
+                backgroundColor: const Color(0xFF2A4D69),
+                child: const Icon(Icons.add),
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const NewClient()),
+                    MaterialPageRoute(builder: (_) => const NewClient()),
                   );
                 },
-                backgroundColor: const Color(0xFF2A4D69),
-                child: const Icon(Icons.add, color: Colors.white),
               ),
             ),
           ),

@@ -1,19 +1,34 @@
 import 'package:flutter/material.dart';
-import 'package:widmancrm/Screens/ScreenCotizacion/new_cotizacion.dart';
-
+import 'package:widmancrm/Screens/ScreenCotizacion/wave_clipper.dart';
 import '../Screens/ScreenCotizacion/add_cotizacion.dart';
+import 'package:widmancrm/api/api_Service.dart';
+import 'package:widmancrm/models/cotizacion_model.dart';
 
-class CotizacionNavigation extends StatelessWidget {
+class CotizacionNavigation extends StatefulWidget {
   const CotizacionNavigation({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
+  State<CotizacionNavigation> createState() => _CotizacionNavigationState();
+}
 
+class _CotizacionNavigationState extends State<CotizacionNavigation> {
+  final ApiService _apiService = ApiService();
+  late Future<List<Cotizacion>> _futureCotizaciones;
+
+  String _searchQuery = '';
+  String _selectedFilter = 'ID';
+
+  @override
+  void initState() {
+    super.initState();
+    _futureCotizaciones = _apiService.fetchCotizaciones();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(
         children: [
-          // Background with wave curve
           ClipPath(
             clipper: WaveClipper(),
             child: Container(
@@ -27,89 +42,72 @@ class CotizacionNavigation extends StatelessWidget {
               height: MediaQuery.of(context).size.height * 0.6,
             ),
           ),
-          // Main content
           SafeArea(
             child: Column(
               children: [
-                // AppBar personalizado
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       IconButton(
-                        icon: const Icon(Icons.menu, color: Colors.white, size: 35),
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
+                        icon: const Icon(Icons.arrow_back, color: Colors.white, size: 30),
+                        onPressed: () => Navigator.pop(context),
                       ),
                       const SizedBox(width: 16),
-                      const Text(
-                        'Cotización',
-                        style: TextStyle(color: Colors.white, fontSize: 20),
-                      ),
+                      const Text('Cotización',
+                          style: TextStyle(color: Colors.white, fontSize: 20)),
                     ],
                   ),
                 ),
-                // Filter Section
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: Column(
                     children: [
-                      const Text(
-                        'Filtrar:',
-                        style: TextStyle(color: Colors.white, fontSize: 16),
+                      TextField(
+                        decoration: InputDecoration(
+                          hintText: 'Buscar por ID, Nombre o Fecha',
+                          prefixIcon: const Icon(Icons.search),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          filled: true,
+                          fillColor: Colors.white,
+                        ),
+                        onChanged: (value) {
+                          setState(() {
+                            _searchQuery = value;
+                          });
+                        },
                       ),
+                      const SizedBox(height: 8),
                       Row(
-                        children: [
-                          FilterChip(
-                            label: const Text('ID'),
-                            onSelected: (bool value) {},
-                            selected: false,
-                            backgroundColor: Colors.white,
-                            labelStyle: const TextStyle(color: Color(0xFF2A4D69)),
-                          ),
-                          const SizedBox(width: 8),
-                          FilterChip(
-                            label: const Text('Fecha'),
-                            onSelected: (bool value) {},
-                            selected: false,
-                            backgroundColor: Colors.white,
-                            labelStyle: const TextStyle(color: Color(0xFF2A4D69)),
-                          ),
-                          const SizedBox(width: 8),
-                          FilterChip(
-                            label: const Text('Nombre'),
-                            onSelected: (bool value) {},
-                            selected: false,
-                            backgroundColor: Colors.white,
-                            labelStyle: const TextStyle(color: Color(0xFF2A4D69)),
-                          ),
-                        ],
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: ['ID', 'Nombre', 'Fecha'].map((filtro) {
+                          return ElevatedButton(
+                            onPressed: () {
+                              setState(() {
+                                _selectedFilter = filtro;
+                              });
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: _selectedFilter == filtro
+                                  ? const Color(0xFF2A4D69)
+                                  : Colors.grey[300],
+                              foregroundColor: _selectedFilter == filtro
+                                  ? Colors.white
+                                  : const Color(0xFF455A64),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            child: Text(filtro),
+                          );
+                        }).toList(),
                       ),
                     ],
                   ),
                 ),
-                // Search Bar
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                  child: TextField(
-                    decoration: InputDecoration(
-                      hintText: 'ID , Fecha , Nombre ',
-                      prefixIcon: const Icon(Icons.search, color: Color(0xFF455A64)),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      filled: true,
-                      fillColor: Colors.white,
-                    ),
-                    onChanged: (value) {
-                      // Add search logic here
-                    },
-                  ),
-                ),
-                // List of Quotations
+                const SizedBox(height: 8),
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -118,44 +116,44 @@ class CotizacionNavigation extends StatelessWidget {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
                       ),
-                      color: Colors.white,
-                      child: ListView(
-                        padding: const EdgeInsets.all(16),
-                        children: [
-                          const Text(
-                            'Lista de Cotizaciones',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xFF455A64),
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          ListTile(
-                            leading: const Text('001'),
-                            title: const Text('Lubricante de FREBA'),
-                            subtitle: const Text('10-06-2025'),
-                          ),
-                          const Divider(),
-                          ListTile(
-                            leading: const Text('002'),
-                            title: const Text('Lubricante de FREBA'),
-                            subtitle: const Text('10-06-2025'),
-                          ),
-                          const Divider(),
-                          ListTile(
-                            leading: const Text('003'),
-                            title: const Text('Lubricante de FREBA'),
-                            subtitle: const Text('10-06-2025'),
-                          ),
-                          const Divider(),
-                          ListTile(
-                            leading: const Text('004'),
-                            title: const Text('Lubricante de FREBA'),
-                            subtitle: const Text('10-06-2025'),
-                          ),
-                        ],
+                      child: FutureBuilder<List<Cotizacion>>(
+                        future: _futureCotizaciones,
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState == ConnectionState.waiting) {
+                            return const Center(child: CircularProgressIndicator());
+                          } else if (snapshot.hasError) {
+                            return Center(child: Text('Error: ${snapshot.error}'));
+                          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                            return const Center(child: Text('No hay cotizaciones disponibles.'));
+                          }
+
+                          final cotizaciones = snapshot.data!;
+                          final q = _searchQuery.toLowerCase();
+
+                          final filtradas = cotizaciones.where((c) {
+                            if (_selectedFilter == 'ID') {
+                              return c.numSec.toString().contains(q);
+                            } else if (_selectedFilter == 'Nombre') {
+                              return c.nombre.toLowerCase().contains(q);
+                            } else if (_selectedFilter == 'Fecha') {
+                              return c.fecha.contains(q);
+                            }
+                            return true;
+                          }).toList();
+
+                          return ListView.builder(
+                            itemCount: filtradas.length,
+                            itemBuilder: (context, i) {
+                              final c = filtradas[i];
+                              return ListTile(
+                                leading: Text(c.numSec.toString()),
+                                title: Text(c.nombre),
+                                subtitle: Text(c.fecha),
+                                trailing: Text(c.observacion),
+                              );
+                            },
+                          );
+                        },
                       ),
                     ),
                   ),

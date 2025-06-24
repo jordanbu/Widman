@@ -5,7 +5,7 @@ class CustomInputField extends StatelessWidget {
   final String labelText;
   final bool obscureText;
 
-  const CustomInputField({
+  const CustomInputField({super.key,
     required this.controller,
     required this.labelText,
     this.obscureText = false,

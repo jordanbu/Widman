@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:widmancrm/Screens/ScreenReporteListasVencidas/wave_clipper.dart';
+import 'package:widmancrm/Screens/ScreenAgenda/wave_clipper.dart';
 
-class ReportListVencidas extends StatelessWidget {
-  const ReportListVencidas({super.key});
+class OtrasAcciones extends StatelessWidget {
+  const OtrasAcciones({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +41,7 @@ class ReportListVencidas extends StatelessWidget {
                       ),
                       const SizedBox(width: 16),
                       const Text(
-                        'Reporte Listas Vencidas',
+                        'Otras Acciones',
                         style: TextStyle(color: Colors.white, fontSize: 20,
 
                         ),
@@ -63,7 +63,7 @@ class ReportListVencidas extends StatelessWidget {
                         padding: const EdgeInsets.all(16),
                         children: [
                           const Text(
-                            'Reporte',
+                            'Buscar',
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               fontSize: 18,
@@ -71,6 +71,10 @@ class ReportListVencidas extends StatelessWidget {
                               color: Color(0xFF455A64),
                             ),
                           ),
+                          Text('data1'),
+                          Text('data2'),
+                          Text('data3'),
+                          Text('data4'),
                           const SizedBox(height: 16),
 
                         ],

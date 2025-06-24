@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:widmancrm/Screens/ScreenOtrasAcciones/otras_acciones.dart';
 import 'package:widmancrm/navigation/agenda.dart';
 import 'package:widmancrm/navigation/cotizacion_navigation.dart';
 import 'package:widmancrm/navigation/create_prospet.dart';
@@ -61,7 +62,8 @@ class _HomeDrawerState extends State<HomeDrawer> {
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           color: Colors.grey[300], // Lighter grey for better contrast
-                          border: Border.all(color: Colors.white, width: 2),
+                          border: Border.all(color: Colors.white, width: 7, ),
+
                           image: _image != null
                               ? DecorationImage(
                             image: FileImage(_image!),
@@ -80,13 +82,16 @@ class _HomeDrawerState extends State<HomeDrawer> {
                     ),
                   ),
                   const SizedBox(height: 8),
+
                   const Text(
                     'Perfil',
+
                     style: TextStyle(
                       color: Colors.black87,
                       fontSize: 15,
                       fontWeight: FontWeight.bold,
                       letterSpacing: 1.2,
+
                     ),
                   ),
                 ],
@@ -196,6 +201,7 @@ class _HomeDrawerState extends State<HomeDrawer> {
               ),
               onTap: () {
                 // Placeholder for extra actions
+                Navigator.push(context, MaterialPageRoute(builder: (context)=> OtrasAcciones()));
               },
             ),
             _buildListTile(
