@@ -6,11 +6,12 @@ import '../models/cliente_model.dart';
 import '../models/cotizacion_model.dart';
 import '../models/prospecto_model.dart';
 import '../models/stock_item_models.dart';
+import '../models/venta_model.dart';
 
 class ApiService {
   static const String baseUrl = 'http://192.168.0.9/WIDMANCRM/Comunicacion.svc';
 
-
+  //GET
   Future<List<StockItem>> fetchStock() async {
     try {
       final response = await http.get(
@@ -28,6 +29,7 @@ class ApiService {
       throw Exception('Error en la conexión: $e');
     }
   }
+  //GET
   Future<List<Prospecto>> fetchProspectos() async {
     final response = await http.get(
       Uri.parse('$baseUrl/ListaProspectos'),
@@ -89,5 +91,18 @@ class ApiService {
       throw Exception('Error al cargar cotizaciones: ${response.statusCode}');
     }
   }
+  //GET
+  Future<List<Venta>> fetchVentas() async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/ListaVenta'),
+      headers: {'Content-Type': 'application/json; charset=utf-8'},
+    );
 
+    if (response.statusCode == 200) {
+      final List<dynamic> data = jsonDecode(response.body);
+      return data.map((json) => Venta.fromJson(json)).toList();
+    } else {
+      throw Exception('Error al cargar ventas: ${response.statusCode}');
+    }
+  }
 }
