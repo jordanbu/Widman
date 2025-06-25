@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:widmancrm/Screens/ScreenStock/wave_clipper.dart';
-import '../api/api_Service.dart';
-import '../models/stock_item_models.dart';
+import 'package:widmancrm/api/api_Service.dart';
+import 'package:widmancrm/models/lista_producto_venta_model.dart';
+import '../Screens/ScreenStock/wave_clipper.dart';
 
 class StockNavigation extends StatefulWidget {
   const StockNavigation({super.key});
@@ -12,12 +12,12 @@ class StockNavigation extends StatefulWidget {
 
 class _StockNavigationState extends State<StockNavigation> {
   final ApiService _apiService = ApiService();
-  late Future<List<StockItem>> _futureStock;
+  late Future<List<ProductoVenta>> _futureProductos;
 
   @override
   void initState() {
     super.initState();
-    _futureStock = _apiService.fetchStock();
+    _futureProductos = _apiService.fetchListaProductoVenta();
   }
 
   @override
@@ -52,8 +52,10 @@ class _StockNavigationState extends State<StockNavigation> {
                         onPressed: () => Navigator.pop(context),
                       ),
                       const SizedBox(width: 16),
-                      const Text('Stock de Productos',
-                          style: TextStyle(color: Colors.white, fontSize: 20)),
+                      const Text(
+                        'Stock de productos',
+                        style: TextStyle(color: Colors.white, fontSize: 20),
+                      ),
                     ],
                   ),
                 ),
@@ -65,26 +67,26 @@ class _StockNavigationState extends State<StockNavigation> {
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                       child: Padding(
                         padding: const EdgeInsets.all(16),
-                        child: FutureBuilder<List<StockItem>>(
-                          future: _futureStock,
+                        child: FutureBuilder<List<ProductoVenta>>(
+                          future: _futureProductos,
                           builder: (context, snapshot) {
                             if (snapshot.connectionState == ConnectionState.waiting) {
                               return const Center(child: CircularProgressIndicator());
                             } else if (snapshot.hasError) {
                               return Center(child: Text('Error: ${snapshot.error}'));
                             } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                              return const Center(child: Text('No hay productos en stock.'));
+                              return const Center(child: Text('No hay productos disponibles.'));
                             } else {
-                              final stockList = snapshot.data!;
+                              final productos = snapshot.data!;
                               return ListView.builder(
-                                itemCount: stockList.length,
+                                itemCount: productos.length,
                                 itemBuilder: (context, index) {
-                                  final item = stockList[index];
+                                  final producto = productos[index];
                                   return ListTile(
-                                    title: Text('Producto ID: ${item.nsProducto}'),
-                                    subtitle: Text(
-                                        'Cantidad: ${item.cantFisica} | Almacén: ${item.nsAlmacen}'),
-                                    leading: const Icon(Icons.inventory),
+                                    leading: const Icon(Icons.shopping_bag),
+                                    title: Text(producto.nombre),
+                                    subtitle: Text('Código: ${producto.codAlterno}'),
+                                    trailing: Text('ID: ${producto.numSec}'),
                                   );
                                 },
                               );

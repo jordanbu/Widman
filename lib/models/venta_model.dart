@@ -16,7 +16,6 @@ class Venta {
     required this.observacion,
     required this.tipo,
   });
-
   factory Venta.fromJson(Map<String, dynamic> json) {
     return Venta(
       codEstado: json['cod_estado'] ?? '',
@@ -29,3 +28,4 @@ class Venta {
     );
   }
 }
+

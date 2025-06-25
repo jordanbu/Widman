@@ -17,9 +17,13 @@ class _NewClientState extends State<NewClient> {
   final ImagePicker _picker = ImagePicker();
   final _formKey = GlobalKey<FormState>();
   final _nombreController = TextEditingController();
+  final _nitController = TextEditingController();
   final _razonSocialController = TextEditingController();
   final _telefonoController = TextEditingController();
-  final _segmentoController = TextEditingController();
+  final _telefono2Controller = TextEditingController();
+  final _telefono3Controller = TextEditingController();
+  final _carnetController = TextEditingController();
+  final _codigoController = TextEditingController();
 
   Future<void> _pickImage() async {
     final XFile? pickedFile = await _picker.pickImage(source: ImageSource.gallery);
@@ -33,10 +37,14 @@ class _NewClientState extends State<NewClient> {
   Future<void> _submit() async {
     if (_formKey.currentState!.validate()) {
       final prospectoData = {
-        'Nombre': _nombreController.text.trim(),
+        'NombreCliente': _nombreController.text.trim(),
+        'Nit': _nitController.text.trim(),
         'RazonSocial': _razonSocialController.text.trim(),
         'Telefono': _telefonoController.text.trim(),
-        'Segmento': _segmentoController.text.trim(),
+        'Telefono2': _telefono2Controller.text.trim(),
+        'Telefono3': _telefono3Controller.text.trim(),
+        'Carnet': _carnetController.text.trim(),
+        'Codigo': _codigoController.text.trim(),
       };
 
       try {
@@ -56,9 +64,13 @@ class _NewClientState extends State<NewClient> {
   @override
   void dispose() {
     _nombreController.dispose();
+    _nitController.dispose();
     _razonSocialController.dispose();
     _telefonoController.dispose();
-    _segmentoController.dispose();
+    _telefono2Controller.dispose();
+    _telefono3Controller.dispose();
+    _carnetController.dispose();
+    _codigoController.dispose();
     super.dispose();
   }
 
@@ -149,6 +161,19 @@ class _NewClientState extends State<NewClient> {
                               value!.isEmpty ? 'Campo requerido' : null,
                             ),
                             const SizedBox(height: 16),
+                            const Text('NIT:', style: TextStyle(fontSize: 16)),
+                            TextFormField(
+                              controller: _nitController,
+                              decoration: InputDecoration(
+                                hintText: 'NIT',
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(30),
+                                ),
+                              ),
+                              validator: (value) =>
+                              value!.isEmpty ? 'Campo requerido' : null,
+                            ),
+                            const SizedBox(height: 16),
                             const Text('Razón Social:', style: TextStyle(fontSize: 16)),
                             TextFormField(
                               controller: _razonSocialController,
@@ -182,11 +207,46 @@ class _NewClientState extends State<NewClient> {
                               },
                             ),
                             const SizedBox(height: 16),
-                            const Text('Segmento:', style: TextStyle(fontSize: 16)),
+                            const Text('Teléfono 2:', style: TextStyle(fontSize: 16)),
                             TextFormField(
-                              controller: _segmentoController,
+                              controller: _telefono2Controller,
                               decoration: InputDecoration(
-                                hintText: 'Segmento',
+                                hintText: 'Teléfono 2',
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(30),
+                                ),
+                              ),
+                              keyboardType: TextInputType.phone,
+                            ),
+                            const SizedBox(height: 16),
+                            const Text('Teléfono 3:', style: TextStyle(fontSize: 16)),
+                            TextFormField(
+                              controller: _telefono3Controller,
+                              decoration: InputDecoration(
+                                hintText: 'Teléfono 3',
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(30),
+                                ),
+                              ),
+                              keyboardType: TextInputType.phone,
+                            ),
+                            const SizedBox(height: 16),
+                            const Text('Carnet:', style: TextStyle(fontSize: 16)),
+                            TextFormField(
+                              controller: _carnetController,
+                              decoration: InputDecoration(
+                                hintText: 'Carnet',
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(30),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            const Text('Código:', style: TextStyle(fontSize: 16)),
+                            TextFormField(
+                              controller: _codigoController,
+                              decoration: InputDecoration(
+                                hintText: 'Código',
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(30),
                                 ),

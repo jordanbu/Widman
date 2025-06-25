@@ -14,6 +14,10 @@ class HomeView extends StatefulWidget {
 class _HomeViewState extends State<HomeView> {
   late Future<List<Cliente>> _futureClientes;
   final TextEditingController _searchController = TextEditingController();
+  final TextEditingController _nombreController = TextEditingController();
+  final TextEditingController _nitController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   String _searchQuery = '';
   String _selectedFilter = 'Nombre';
@@ -27,7 +31,55 @@ class _HomeViewState extends State<HomeView> {
   @override
   void dispose() {
     _searchController.dispose();
+    _nombreController.dispose();
+    _nitController.dispose();
+    _emailController.dispose();
     super.dispose();
+  }
+
+  // Método para refrescar la lista de clientes
+  void _refreshClientes() {
+    setState(() {
+      _futureClientes = ApiService().fetchClientes();
+    });
+  }
+
+  // Método para agregar un cliente
+  Future<void> _agregarCliente() async {
+    if (_formKey.currentState!.validate()) {
+      final clienteData = {
+        'IDPersona': 0, // El servidor puede generar este ID
+        'NombreCliente': _nombreController.text,
+        'Nit': _nitController.text,
+        'conCredito': 0, // Sin crédito por defecto
+        'descuento': 0.0, // Sin descuento por defecto
+        'limiteCredito': 0.0, // Sin límite de crédito por defecto
+        'Email': _emailController.text,
+      };
+
+      try {
+        final apiService = ApiService();
+        final result = await apiService.registrarProspecto(clienteData);
+        if (result > 0) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Cliente registrado exitosamente')),
+          );
+          _refreshClientes(); // Actualizar la lista
+          Navigator.of(context).pop(); // Cerrar el diálogo
+          _nombreController.clear();
+          _nitController.clear();
+          _emailController.clear();
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Error al registrar cliente')),
+          );
+        }
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $e')),
+        );
+      }
+    }
   }
 
   @override
@@ -64,10 +116,7 @@ class _HomeViewState extends State<HomeView> {
                           onPressed: () => Scaffold.of(context).openDrawer(),
                         ),
                       ),
-                      Icon(
-                        Icons.add_alert,
-                        color: Colors.white,
-                      )
+                      const Icon(Icons.add_alert, color: Colors.white),
                     ],
                   ),
                 ),
@@ -152,8 +201,7 @@ class _HomeViewState extends State<HomeView> {
                             } else if (_selectedFilter == 'ID') {
                               return c.idPersona.toString().contains(q);
                             } else if (_selectedFilter == 'Fecha') {
-                              // CAMPO SIMULADO (modificar cuando tengas fecha real)
-                              return '2024-06-20'.contains(q);
+                              return '2024-06-20'.contains(q); // Simulado
                             }
                             return true;
                           }).toList();
@@ -179,6 +227,74 @@ class _HomeViewState extends State<HomeView> {
             ),
           ],
         ),
+      ),
+
+      // Botón flotante para agregar cliente
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: const Color(0xFF2A4D69),
+        child: const Icon(Icons.person_add, color: Colors.white),
+        onPressed: () {
+          showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: const Text('Agregar Cliente'),
+              content: Form(
+                key: _formKey,
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      TextFormField(
+                        controller: _nombreController,
+                        decoration: const InputDecoration(labelText: 'Nombre'),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Por favor, ingrese el nombre';
+                          }
+                          return null;
+                        },
+                      ),
+                      TextFormField(
+                        controller: _nitController,
+                        decoration: const InputDecoration(labelText: 'NIT'),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Por favor, ingrese el NIT';
+                          }
+                          return null;
+                        },
+                      ),
+                      TextFormField(
+                        controller: _emailController,
+                        decoration: const InputDecoration(labelText: 'Email'),
+                        keyboardType: TextInputType.emailAddress,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Por favor, ingrese el email';
+                          }
+                          if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
+                            return 'Por favor, ingrese un email válido';
+                          }
+                          return null;
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('Cerrar'),
+                ),
+                ElevatedButton(
+                  onPressed: _agregarCliente,
+                  child: const Text('Confirmar'),
+                ),
+              ],
+            ),
+          );
+        },
       ),
     );
   }

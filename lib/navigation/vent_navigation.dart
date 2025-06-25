@@ -205,6 +205,13 @@ class _VentNavigationState extends State<VentNavigation> {
           ),
         ],
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+        },
+        backgroundColor: const Color(0xFF2A4D69),
+        child: const Icon(Icons.add, color: Colors.white),
+        tooltip: 'Registrar Nueva Venta',
+      ),
     );
   }
 }
