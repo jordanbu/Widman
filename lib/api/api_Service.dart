@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:widmancrm/models/contacto_cliente_model.dart';
 import 'package:widmancrm/models/lista_producto_venta_model.dart';
 
 import '../models/cliente_model.dart';
@@ -150,8 +151,4 @@ class ApiService {
       throw Exception('Error al obtener productos');
     }
   }
-
-
-
 }
-

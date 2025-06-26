@@ -22,4 +22,22 @@ class ProductoVenta {
       tipo: json['tipo'],
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'codAlterno': codAlterno,
+      'nombre': nombre,
+      'ns_Unidad': nsUnidad,
+      'num_sec': numSec,
+      'tipo': tipo,
+    };
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+          other is ProductoVenta && runtimeType == other.runtimeType && numSec == other.numSec;
+
+  @override
+  int get hashCode => numSec.hashCode;
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:widmancrm/Screens/ScreenVentas/new_sale_screen.dart';
 import '../Screens/ScreenVentas/wave_clipper.dart';
 import '../api/api_Service.dart';
 import '../models/venta_model.dart';
@@ -207,6 +208,7 @@ class _VentNavigationState extends State<VentNavigation> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
+          Navigator.push(context, MaterialPageRoute(builder: (context)=> NewSaleScreen()));
         },
         backgroundColor: const Color(0xFF2A4D69),
         child: const Icon(Icons.add, color: Colors.white),

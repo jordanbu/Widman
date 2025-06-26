@@ -9,18 +9,20 @@ class PizarraVirtual extends StatefulWidget {
 }
 
 class _PizarraVirtualState extends State<PizarraVirtual> {
-  String _searchQuery = '';
-  String _selectedFilter = 'All'; // Track selected filter
+  List<Offset?> puntos = [];
 
   @override
   Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
       body: Stack(
         children: [
-          // Background with wave curve
+          // Fondo con curva
           ClipPath(
             clipper: WaveClipper(),
             child: Container(
+              height: screenHeight * 0.6,
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
@@ -28,10 +30,8 @@ class _PizarraVirtualState extends State<PizarraVirtual> {
                   colors: [Color(0xFF2A4D69), Color(0xFF3C5A74)],
                 ),
               ),
-              height: MediaQuery.of(context).size.height * 0.6,
             ),
           ),
-          // Main content
           SafeArea(
             child: Column(
               children: [
@@ -39,13 +39,10 @@ class _PizarraVirtualState extends State<PizarraVirtual> {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       IconButton(
-                        icon: const Icon(Icons.menu, color: Colors.white, size: 35),
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
+                        icon: const Icon(Icons.arrow_back, color: Colors.white, size: 30),
+                        onPressed: () => Navigator.pop(context),
                       ),
                       const SizedBox(width: 16),
                       const Text(
@@ -64,87 +61,66 @@ class _PizarraVirtualState extends State<PizarraVirtual> {
                         borderRadius: BorderRadius.circular(16),
                       ),
                       color: Colors.white,
-                      child: ListView(
-                        padding: const EdgeInsets.all(16),
-                        children: [
-                          const Text(
-                            'Pizarra',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xFF455A64),
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          // Search bar
-                          TextField(
-                            decoration: InputDecoration(
-                              hintText: 'Buscar...',
-                              prefixIcon: const Icon(Icons.search, color: Color(0xFF455A64)),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(color: Color(0xFF455A64)),
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          children: [
+                            const Text(
+                              'Zona de Dibujo',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF455A64),
                               ),
-                              filled: true,
-                              fillColor: Colors.grey[100],
                             ),
-                            onChanged: (value) {
-                              setState(() {
-                                _searchQuery = value;
-                              });
-                            },
-                          ),
-                          const SizedBox(height: 16),
-                          // Filter buttons
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              ElevatedButton(
-                                onPressed: () {
+                            const SizedBox(height: 12),
+                            // Zona de dibujo
+                            Expanded(
+                              child: GestureDetector(
+                                onPanUpdate: (details) {
+                                  RenderBox box = context.findRenderObject() as RenderBox;
+                                  Offset point = box.globalToLocal(details.globalPosition);
                                   setState(() {
-                                    _selectedFilter = 'Client';
+                                    puntos.add(point);
                                   });
                                 },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: _selectedFilter == 'Client'
-                                      ? const Color(0xFF2A4D69)
-                                      : Colors.grey[300],
-                                  foregroundColor: _selectedFilter == 'Client'
-                                      ? Colors.white
-                                      : const Color(0xFF455A64),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                                ),
-                                child: const Text('Cliente'),
-                              ),
-                              const SizedBox(width: 16),
-                              ElevatedButton(
-                                onPressed: () {
+                                onPanEnd: (_) {
                                   setState(() {
-                                    _selectedFilter = 'Prospect';
+                                    puntos.add(null);
                                   });
                                 },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: _selectedFilter == 'Prospect'
-                                      ? const Color(0xFF2A4D69)
-                                      : Colors.grey[300],
-                                  foregroundColor: _selectedFilter == 'Prospect'
-                                      ? Colors.white
-                                      : const Color(0xFF455A64),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: CustomPaint(
+                                    painter: PizarraPainter(puntos),
+                                    child: Container(
+                                      color: Colors.grey[200],
+                                      width: double.infinity,
+                                    ),
                                   ),
-                                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                                 ),
-                                child: const Text('Prospecto'),
                               ),
-                            ],
-                          ),
-                          const SizedBox(height: 16),
-                        ],
+                            ),
+                            const SizedBox(height: 12),
+                            // Botón limpiar
+                            ElevatedButton.icon(
+                              onPressed: () {
+                                setState(() {
+                                  puntos.clear();
+                                });
+                              },
+                              icon: const Icon(Icons.delete),
+                              label: const Text('Limpiar'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.redAccent,
+                                foregroundColor: Colors.white,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -156,4 +132,26 @@ class _PizarraVirtualState extends State<PizarraVirtual> {
       ),
     );
   }
+}
+
+class PizarraPainter extends CustomPainter {
+  final List<Offset?> puntos;
+  PizarraPainter(this.puntos);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.black
+      ..strokeWidth = 4.0
+      ..strokeCap = StrokeCap.round;
+
+    for (int i = 0; i < puntos.length - 1; i++) {
+      if (puntos[i] != null && puntos[i + 1] != null) {
+        canvas.drawLine(puntos[i]!, puntos[i + 1]!, paint);
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(PizarraPainter oldDelegate) => true;
 }
