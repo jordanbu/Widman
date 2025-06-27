@@ -91,7 +91,7 @@ class _CuentasPVenderState extends State<CuentasPVencer> {
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       IconButton(
-                        icon: const Icon(Icons.menu, color: Colors.white, size: 35),
+                        icon: const Icon(Icons.arrow_back, color: Colors.white, size: 35),
                         onPressed: () {
                           Navigator.pop(context); // CORREGIDO
                         },

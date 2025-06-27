@@ -28,6 +28,7 @@ class _CotizacionNavigationState extends State<CotizacionNavigation> {
   }
 
   void _loadData() {
+    print('API mostrando datos'); // Added console message
     _loadCotizaciones();
     _loadClientes();
   }
