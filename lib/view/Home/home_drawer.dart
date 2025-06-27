@@ -3,15 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:widmancrm/Screens/ScreenOtrasAcciones/otras_acciones.dart';
-import 'package:widmancrm/navigation/agenda.dart';
-import 'package:widmancrm/navigation/cotizacion_navigation.dart';
-import 'package:widmancrm/navigation/create_prospet.dart';
-import 'package:widmancrm/navigation/cuentas_p_vencer.dart';
-import 'package:widmancrm/navigation/pizarra_virtual.dart';
-import 'package:widmancrm/navigation/report_list_vencidas.dart';
-import 'package:widmancrm/navigation/stock_navigation.dart';
-import 'package:widmancrm/navigation/vent_navigation.dart';
 import 'package:widmancrm/view/login_view.dart';
 
 class HomeDrawer extends StatefulWidget {
@@ -25,10 +16,30 @@ class _HomeDrawerState extends State<HomeDrawer> {
   File? _image;
   final ImagePicker _picker = ImagePicker();
 
+  // Controladores para los campos de edición
+  final TextEditingController _nombreController = TextEditingController();
+  final TextEditingController _correoController = TextEditingController();
+  final TextEditingController _telefonoController = TextEditingController();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
+  // Variables para almacenar los datos del perfil
+  String _nombre = '';
+  String _correo = '';
+  String _telefono = '';
+
   @override
   void initState() {
     super.initState();
     _loadImagePath();
+    _loadProfileData();
+  }
+
+  @override
+  void dispose() {
+    _nombreController.dispose();
+    _correoController.dispose();
+    _telefonoController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadImagePath() async {
@@ -41,9 +52,25 @@ class _HomeDrawerState extends State<HomeDrawer> {
     }
   }
 
+  Future<void> _loadProfileData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _nombre = prefs.getString('profile_name') ?? 'Usuario';
+      _correo = prefs.getString('profile_email') ?? 'correo@ejemplo.com';
+      _telefono = prefs.getString('profile_phone') ?? '000-000-0000';
+    });
+  }
+
   Future<void> _saveImagePath(String path) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString('profile_image_path', path);
+  }
+
+  Future<void> _saveProfileData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('profile_name', _nombre);
+    await prefs.setString('profile_email', _correo);
+    await prefs.setString('profile_phone', _telefono);
   }
 
   Future<void> _pickImage() async {
@@ -62,6 +89,154 @@ class _HomeDrawerState extends State<HomeDrawer> {
     }
   }
 
+  Future<void> _showEditProfileDialog() async {
+    // Inicializar los controladores con los datos actuales
+    _nombreController.text = _nombre;
+    _correoController.text = _correo;
+    _telefonoController.text = _telefono;
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text(
+          'Editar Perfil',
+          style: TextStyle(
+            color: Color(0xFF2A4D69),
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        content: Form(
+          key: _formKey,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Campo Nombre
+                TextFormField(
+                  controller: _nombreController,
+                  decoration: InputDecoration(
+                    labelText: 'Nombre',
+                    prefixIcon: const Icon(Icons.person, color: Color(0xFF2A4D69)),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: Color(0xFF2A4D69)),
+                    ),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Por favor, ingrese su nombre';
+                    }
+                    if (value.trim().length < 2) {
+                      return 'El nombre debe tener al menos 2 caracteres';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 16),
+
+                // Campo Correo
+                TextFormField(
+                  controller: _correoController,
+                  keyboardType: TextInputType.emailAddress,
+                  decoration: InputDecoration(
+                    labelText: 'Correo Electrónico',
+                    prefixIcon: const Icon(Icons.email, color: Color(0xFF2A4D69)),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: Color(0xFF2A4D69)),
+                    ),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Por favor, ingrese su correo';
+                    }
+                    if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value.trim())) {
+                      return 'Por favor, ingrese un correo válido';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 16),
+
+                // Campo Teléfono
+                TextFormField(
+                  controller: _telefonoController,
+                  keyboardType: TextInputType.phone,
+                  decoration: InputDecoration(
+                    labelText: 'Teléfono',
+                    prefixIcon: const Icon(Icons.phone, color: Color(0xFF2A4D69)),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: Color(0xFF2A4D69)),
+                    ),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Por favor, ingrese su teléfono';
+                    }
+                    if (value.trim().length < 8) {
+                      return 'El teléfono debe tener al menos 8 dígitos';
+                    }
+                    return null;
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.grey[600],
+            ),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              if (_formKey.currentState!.validate()) {
+                setState(() {
+                  _nombre = _nombreController.text.trim();
+                  _correo = _correoController.text.trim();
+                  _telefono = _telefonoController.text.trim();
+                });
+
+                await _saveProfileData();
+
+                Navigator.of(context).pop();
+
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Perfil actualizado correctamente'),
+                    backgroundColor: Color(0xFF2A4D69),
+                  ),
+                );
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF2A4D69),
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: const Text('Guardar'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Align(
@@ -75,11 +250,18 @@ class _HomeDrawerState extends State<HomeDrawer> {
               child: ListView(
                 padding: EdgeInsets.zero,
                 children: [
-                  DrawerHeader(
-                    decoration: const BoxDecoration(color: Colors.white),
+                  // Header del Drawer con información del perfil
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                      border: Border(
+                        bottom: BorderSide(color: Colors.grey, width: 0.5),
+                      ),
+                    ),
                     child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
+                        // Imagen de perfil
                         GestureDetector(
                           onTap: _pickImage,
                           child: Container(
@@ -105,77 +287,88 @@ class _HomeDrawerState extends State<HomeDrawer> {
                                 : null,
                           ),
                         ),
-                        const SizedBox(height: 8),
-                        const Text(
-                          'Perfil',
-                          style: TextStyle(
+                        const SizedBox(height: 12),
+
+                        // Información del perfil
+                        Text(
+                          _nombre,
+                          style: const TextStyle(
                             color: Colors.black87,
-                            fontSize: 15,
+                            fontSize: 18,
                             fontWeight: FontWeight.bold,
-                            letterSpacing: 1.2,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          _correo,
+                          style: TextStyle(
+                            color: Colors.grey[600],
+                            fontSize: 14,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          _telefono,
+                          style: TextStyle(
+                            color: Colors.grey[600],
+                            fontSize: 14,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+
+                        // Botón de editar perfil
+                        ElevatedButton.icon(
+                          onPressed: _showEditProfileDialog,
+                          icon: const Icon(Icons.edit, size: 18),
+                          label: const Text('Editar Perfil'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF2A4D69),
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
                           ),
                         ),
                       ],
                     ),
                   ),
-                  _buildListTile(
-                    icon: Icons.app_registration,
-                    title: 'Cotización',
-                    onTap: () => _navigate(context, const CotizacionNavigation()),
-                  ),
-                  _buildListTile(
-                    icon: Icons.attach_money,
-                    title: 'Ventas',
-                    onTap: () => _navigate(context, const VentNavigation()),
-                  ),
-                  _buildListTile(
-                    icon: Icons.bar_chart,
-                    title: 'Stock',
-                    onTap: () => _navigate(context, const StockNavigation()),
-                  ),
-                  _buildListTile(
-                    icon: Icons.supervised_user_circle,
-                    title: 'Prospecto',
-                    onTap: () => _navigate(context, const CreateProspect()),
-                  ),
-                  _buildListTile(
-                    icon: Icons.video_label,
-                    title: 'Pizarra Virtual',
-                    onTap: () => _navigate(context, const PizarraVirtual()),
-                  ),
-                  _buildListTile(
-                    icon: Icons.analytics,
-                    title: 'Reporte Listas Vencidas',
-                    onTap: () => _navigate(context, const ReportListVencidas()),
-                  ),
-                  _buildListTile(
-                    icon: Icons.schedule,
-                    title: 'Cuentas por Vencer',
-                    onTap: () => _navigate(context, const CuentasPVencer()),
-                  ),
-                  _buildListTile(
-                    icon: Icons.calendar_month,
-                    title: 'Agenda',
-                    onTap: () => _navigate(context, const Agenda()),
-                  ),
+
+                  const SizedBox(height: 8),
+
+                  // Espaciador para centrar el botón de cerrar sesión
+                  SizedBox(height: MediaQuery.of(context).size.height * 0.3),
+
                   const Divider(),
-                  ListTile(
-                    title: const Text(
-                      'Otras Acciones',
-                      style: TextStyle(color: Colors.black87),
+                  // Botón de cerrar sesión centrado
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        onPressed: () {
+                          Navigator.pop(context);
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(builder: (_) => LoginView()),
+                          );
+                        },
+                        icon: const Icon(Icons.logout, size: 20),
+                        label: const Text(
+                          'Cerrar Sesión',
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red[600],
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          elevation: 2,
+                        ),
+                      ),
                     ),
-                    onTap: () => _navigate(context, OtrasAcciones()),
-                  ),
-                  _buildListTile(
-                    icon: Icons.logout,
-                    title: 'Cerrar Sesión',
-                    onTap: () {
-                      Navigator.pop(context);
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(builder: (_) => LoginView()),
-                      );
-                    },
                   ),
                 ],
               ),
@@ -183,18 +376,6 @@ class _HomeDrawerState extends State<HomeDrawer> {
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildListTile({
-    required IconData icon,
-    required String title,
-    required VoidCallback onTap,
-  }) {
-    return ListTile(
-      leading: Icon(icon, color: const Color(0xFF2A4D69)),
-      title: Text(title, style: const TextStyle(color: Colors.black87)),
-      onTap: onTap,
     );
   }
 
