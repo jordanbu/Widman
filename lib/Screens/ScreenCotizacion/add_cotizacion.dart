@@ -48,6 +48,24 @@ class _AddCotizacionState extends State<AddCotizacion> {
     }
   }
 
+  Future<void> _showAddProductDialog() async {
+    final result = await showDialog<ProductoVenta>(
+      context: context,
+      builder: (context) => const AddProductDialog(),
+    );
+
+    if (result != null) {
+      setState(() {
+        // Verificar si el producto ya existe para evitar duplicados
+        if (!_selectedProductos.any((p) => p.numSec == result.numSec)) {
+          _selectedProductos.add(result);
+        } else {
+          _showSnackBar('El producto ya está en la lista');
+        }
+      });
+    }
+  }
+
   Future<void> _guardarCotizacion() async {
     if (!_formKey.currentState!.validate() || _selectedCliente == null) {
       _showSnackBar('Completa todos los campos requeridos');
@@ -146,6 +164,7 @@ class _AddCotizacionState extends State<AddCotizacion> {
       isExpanded: true,
     );
   }
+
   Widget _buildProductosField() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -155,17 +174,43 @@ class _AddCotizacionState extends State<AddCotizacion> {
           style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),
-        ElevatedButton(
-          onPressed: _selectProductos,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF2A4D69),
-            padding: const EdgeInsets.symmetric(vertical: 10),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-          ),
-          child: const Text(
-            'Seleccionar Productos',
-            style: TextStyle(color: Colors.white),
-          ),
+        Row(
+          children: [
+            Expanded(
+              child: ElevatedButton(
+                onPressed: _selectProductos,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF2A4D69),
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                ),
+                child: const Text(
+                  'Seleccionar Productos',
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            ElevatedButton(
+              onPressed: _showAddProductDialog,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green,
+                padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              ),
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.add, color: Colors.white),
+                  SizedBox(width: 4),
+                  Text(
+                    'Agregar',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
         const SizedBox(height: 8),
         _selectedProductos.isEmpty
@@ -176,24 +221,27 @@ class _AddCotizacionState extends State<AddCotizacion> {
           itemCount: _selectedProductos.length,
           itemBuilder: (context, index) {
             final producto = _selectedProductos[index];
-            return ListTile(
-              title: Text(producto.nombre),
-              subtitle: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Código: ${producto.codAlterno}'),
-                  Text('Stock: ${producto.nsUnidad}'),
-                  Text('Tipo: ${producto.tipo}'),
-                  Text('ID: ${producto.numSec}'),
-                ],
-              ),
-              trailing: IconButton(
-                icon: const Icon(Icons.delete, color: Colors.red),
-                onPressed: () {
-                  setState(() {
-                    _selectedProductos.removeAt(index);
-                  });
-                },
+            return Card(
+              margin: const EdgeInsets.symmetric(vertical: 4),
+              child: ListTile(
+                title: Text(producto.nombre),
+                subtitle: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Código: ${producto.codAlterno}'),
+                    Text('Stock: ${producto.nsUnidad}'),
+                    Text('Tipo: ${producto.tipo}'),
+                    Text('ID: ${producto.numSec}'),
+                  ],
+                ),
+                trailing: IconButton(
+                  icon: const Icon(Icons.delete, color: Colors.red),
+                  onPressed: () {
+                    setState(() {
+                      _selectedProductos.removeAt(index);
+                    });
+                  },
+                ),
               ),
             );
           },
@@ -260,6 +308,171 @@ class _AddCotizacionState extends State<AddCotizacion> {
               ),
             );
           },
+        ),
+      ),
+    );
+  }
+}
+
+class AddProductDialog extends StatefulWidget {
+  const AddProductDialog({super.key});
+
+  @override
+  State<AddProductDialog> createState() => _AddProductDialogState();
+}
+
+class _AddProductDialogState extends State<AddProductDialog> {
+  final _formKey = GlobalKey<FormState>();
+  final _codAlternoController = TextEditingController();
+  final _nombreController = TextEditingController();
+  final _stockController = TextEditingController();
+  final _idController = TextEditingController();
+  int _selectedTipo = 1;
+
+  @override
+  void dispose() {
+    _codAlternoController.dispose();
+    _nombreController.dispose();
+    _stockController.dispose();
+    _idController.dispose();
+    super.dispose();
+  }
+
+  void _crearProducto() {
+    if (_formKey.currentState!.validate()) {
+      final nuevoProducto = ProductoVenta(
+        codAlterno: _codAlternoController.text.trim(),
+        nombre: _nombreController.text.trim(),
+        nsUnidad: int.parse(_stockController.text.trim()),
+        numSec: int.parse(_idController.text.trim()),
+        tipo: _selectedTipo,
+      );
+
+      Navigator.of(context).pop(nuevoProducto);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Agregar Nuevo Producto',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _codAlternoController,
+                decoration: const InputDecoration(
+                  labelText: 'Código Alterno',
+                  hintText: 'Ingresa el código del producto',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'El código es obligatorio';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: _nombreController,
+                decoration: const InputDecoration(
+                  labelText: 'Nombre',
+                  hintText: 'Ingresa el nombre del producto',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'El nombre es obligatorio';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: _stockController,
+                decoration: const InputDecoration(
+                  labelText: 'Stock',
+                  hintText: 'Ingresa la cantidad en stock',
+                  border: OutlineInputBorder(),
+                ),
+                keyboardType: TextInputType.number,
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'El stock es obligatorio';
+                  }
+                  if (int.tryParse(value) == null) {
+                    return 'Ingresa un número válido';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: _idController,
+                decoration: const InputDecoration(
+                  labelText: 'ID Único',
+                  hintText: 'Ingresa un ID único para el producto',
+                  border: OutlineInputBorder(),
+                ),
+                keyboardType: TextInputType.number,
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'El ID es obligatorio';
+                  }
+                  if (int.tryParse(value) == null) {
+                    return 'Ingresa un número válido';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 12),
+              DropdownButtonFormField<int>(
+                value: _selectedTipo,
+                decoration: const InputDecoration(
+                  labelText: 'Tipo',
+                  border: OutlineInputBorder(),
+                ),
+                items: const [
+                  DropdownMenuItem(value: 1, child: Text('Tipo 1')),
+                  DropdownMenuItem(value: 2, child: Text('Tipo 2')),
+                  DropdownMenuItem(value: 3, child: Text('Tipo 3')),
+                ],
+                onChanged: (value) => setState(() => _selectedTipo = value!),
+              ),
+              const SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: const Text('Cancelar'),
+                  ),
+                  const SizedBox(width: 8),
+                  ElevatedButton(
+                    onPressed: _crearProducto,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                    ),
+                    child: const Text(
+                      'Agregar',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

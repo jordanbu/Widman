@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:widmancrm/models/contacto_cliente_model.dart';
 import 'package:widmancrm/models/lista_producto_venta_model.dart';
 
 import '../models/cliente_model.dart';
@@ -150,5 +149,16 @@ class ApiService {
     } else {
       throw Exception('Error al obtener productos');
     }
+//Peticiones get
   }
+  /*
+  Future<List<RegistrarVenta>> fetchRegistrarVenta()async {
+    final response = await http.get(Uri.parse('$baseUrl/RegistrarVenta'));
+    if (response.statusCode == 200){
+      final List<dynamic>data = jsonDecode(response.body);
+      return data.map((item)=> RegistrarVenta.fromJson(item).toList());
+    } else {
+      throw Exception('Error al registrarVenta')
+    }
+  }*/
 }
