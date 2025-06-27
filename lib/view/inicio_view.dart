@@ -94,7 +94,6 @@ class InicioView extends StatelessWidget {
                               child: const Text('Regístrate'),
                             ),
                           ),
-
                           const Spacer(),
                         ],
                       ),

@@ -287,7 +287,7 @@ class _HomeDrawerState extends State<HomeDrawer> {
                                 : null,
                           ),
                         ),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: 25),
 
                         // Información del perfil
                         Text(
@@ -306,7 +306,7 @@ class _HomeDrawerState extends State<HomeDrawer> {
                             fontSize: 14,
                           ),
                         ),
-                        const SizedBox(height: 2),
+                        const SizedBox(height: 15),
                         Text(
                           _telefono,
                           style: TextStyle(
@@ -314,7 +314,7 @@ class _HomeDrawerState extends State<HomeDrawer> {
                             fontSize: 14,
                           ),
                         ),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: 25),
 
                         // Botón de editar perfil
                         ElevatedButton.icon(
@@ -334,7 +334,7 @@ class _HomeDrawerState extends State<HomeDrawer> {
                     ),
                   ),
 
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 72),
 
                   // Espaciador para centrar el botón de cerrar sesión
                   SizedBox(height: MediaQuery.of(context).size.height * 0.3),
@@ -356,7 +356,7 @@ class _HomeDrawerState extends State<HomeDrawer> {
                         icon: const Icon(Icons.logout, size: 20),
                         label: const Text(
                           'Cerrar Sesión',
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
                         ),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.red[600],

@@ -56,7 +56,7 @@ class _CreateProspectState extends State<CreateProspect> {
                   child: Row(
                     children: [
                       IconButton(
-                        icon: const Icon(Icons.menu, color: Colors.white, size: 30),
+                        icon: const Icon(Icons.arrow_back, color: Colors.white, size: 30),
                         onPressed: () => Navigator.pop(context),
                       ),
                       const SizedBox(width: 16),
