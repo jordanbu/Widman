@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:widmancrm/api/api_service.dart';
 import 'package:widmancrm/models/cliente_model.dart';
-import 'package:widmancrm/models/cita_model.dart';
 import 'package:widmancrm/services_auth/agenda_Services.dart';
 import 'package:widmancrm/widgets/agenda/cliente_dropdown.dart';
 import 'package:widmancrm/widgets/agenda/motivo_field.dart';
@@ -15,7 +14,6 @@ import 'package:widmancrm/widgets/agenda/agenda_calendar.dart';
 import 'package:widmancrm/widgets/agenda/citas_list.dart';
 import 'package:widmancrm/utils/agenda_constants.dart';
 import 'package:widmancrm/utils/agenda_validators.dart';
-import 'package:widmancrm/utils/agenda_constants.dart';
 import '../Screens/ScreenAgenda/wave_clipper.dart' show WaveClipper;
 
 class Agenda extends StatefulWidget {
@@ -170,11 +168,6 @@ class _AgendaState extends State<Agenda> {
       ),
     );
   }
-
-  // ===============================================
-  // UI Builders
-  // ===============================================
-
   Widget _buildAppBar() {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 12),
