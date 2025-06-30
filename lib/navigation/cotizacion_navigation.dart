@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:printing/printing.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
 import 'package:widmancrm/Screens/ScreenCotizacion/wave_clipper.dart';
 import '../Screens/ScreenCotizacion/add_cotizacion.dart';
 import 'package:widmancrm/api/api_Service.dart';
@@ -28,7 +31,7 @@ class _CotizacionNavigationState extends State<CotizacionNavigation> {
   }
 
   void _loadData() {
-    print('API mostrando datos'); // Added console message
+    print('API mostrando datos');
     _loadCotizaciones();
     _loadClientes();
   }
@@ -98,14 +101,47 @@ class _CotizacionNavigationState extends State<CotizacionNavigation> {
     }
   }
 
+  Future<void> _printCotizacion(Cotizacion cotizacion) async {
+    final doc = pw.Document();
+
+    doc.addPage(pw.Page(
+      build: (pw.Context context) {
+        return pw.Column(
+          crossAxisAlignment: pw.CrossAxisAlignment.start,
+          children: [
+            pw.Text('FarmaciaCentralSCz', style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold)),
+            pw.Text('Av. El Trompillo y Av. San Aurelio, Edificio Empre: 68823292'),
+            pw.Text('Fecha de Impresión: ${DateTime.now().toString().substring(0, 19)}'),
+            pw.Text('COTIZACION', style: pw.TextStyle(fontSize: 20, fontWeight: pw.FontWeight.bold)),
+            pw.Text('ID Cotización: ${cotizacion.numSec}'),
+            pw.Text('Cliente: ${_getClienteName(cotizacion.idCliente)}'),
+            pw.Text('Vendedor: EMPLEADO GENERAL'),
+            pw.Text('Fecha Cotización: ${cotizacion.fecha}'),
+            pw.Text('Válido hasta: 03/07/2025'), // Hardcoded from image
+            pw.Text('Moneda: Bolivianos'), // Hardcoded from image
+            pw.Table.fromTextArray(
+              headers: ['COD REF', 'CODIGO', 'DESCRIPCION', 'OBS', 'UNI', 'CANT', 'P/U', 'PARCIAL', 'DESCUENTO', 'TOTAL'],
+              data: [
+                ['1', '009986', 'EUCAMELIEE X120ML-MEDIFAR', '', 'Unidad', '1.00', '89.00', '89.00', '0.00', '89.00'],
+                ['PITI-009986', '0099861', 'CURADIL 75BOLSA 250ML-SALES DE REHIDRAT.', '', 'Unidad', '1.00', '30.78', '30.78', '0.00', '30.78'],
+              ],
+            ),
+            pw.Text('TOTAL GENERAL: 119.78'), // Hardcoded from image
+            pw.Text('Observaciones: ${cotizacion.observacion.isNotEmpty ? cotizacion.observacion : ''}'),
+          ],
+        );
+      },
+    ));
+
+    await Printing.layoutPdf(onLayout: (format) => doc.save());
+  }
+
   void _showCotizacionDetails(Cotizacion cotizacion) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           title: Row(
             children: [
               Icon(Icons.description, color: Color(0xFF2A4D69)),
@@ -113,11 +149,7 @@ class _CotizacionNavigationState extends State<CotizacionNavigation> {
               Expanded(
                 child: Text(
                   'Detalles de Cotización',
-                  style: TextStyle(
-                    color: Color(0xFF2A4D69),
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(color: Color(0xFF2A4D69), fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ),
             ],
@@ -142,10 +174,13 @@ class _CotizacionNavigationState extends State<CotizacionNavigation> {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              style: TextButton.styleFrom(
-                foregroundColor: Color(0xFF2A4D69),
-              ),
+              style: TextButton.styleFrom(foregroundColor: Color(0xFF2A4D69)),
               child: const Text('Cerrar'),
+            ),
+            TextButton(
+              onPressed: () => _printCotizacion(cotizacion),
+              style: TextButton.styleFrom(foregroundColor: Color(0xFF2A4D69)),
+              child: const Text('Imprimir'),
             ),
           ],
         );
@@ -173,20 +208,12 @@ class _CotizacionNavigationState extends State<CotizacionNavigation> {
               children: [
                 Text(
                   label,
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.grey[600],
-                  ),
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: Colors.grey[600]),
                 ),
                 SizedBox(height: 2),
                 Text(
                   value,
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: color ?? Colors.black87,
-                  ),
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: color ?? Colors.black87),
                 ),
               ],
             ),
@@ -201,9 +228,7 @@ class _CotizacionNavigationState extends State<CotizacionNavigation> {
       margin: EdgeInsets.symmetric(vertical: 4, horizontal: 8),
       child: Card(
         elevation: 2,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         child: InkWell(
           borderRadius: BorderRadius.circular(12),
           onTap: () => _showCotizacionDetails(cotizacion),
@@ -212,7 +237,6 @@ class _CotizacionNavigationState extends State<CotizacionNavigation> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Header con ID y Estado
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -224,11 +248,7 @@ class _CotizacionNavigationState extends State<CotizacionNavigation> {
                       ),
                       child: Text(
                         'ID: ${cotizacion.numSec}',
-                        style: TextStyle(
-                          color: Color(0xFF2A4D69),
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
-                        ),
+                        style: TextStyle(color: Color(0xFF2A4D69), fontWeight: FontWeight.bold, fontSize: 12),
                       ),
                     ),
                     Container(
@@ -236,10 +256,7 @@ class _CotizacionNavigationState extends State<CotizacionNavigation> {
                       decoration: BoxDecoration(
                         color: _getEstadoColor(cotizacion.codEstado).withOpacity(0.1),
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: _getEstadoColor(cotizacion.codEstado),
-                          width: 1,
-                        ),
+                        border: Border.all(color: _getEstadoColor(cotizacion.codEstado), width: 1),
                       ),
                       child: Text(
                         _getEstadoText(cotizacion.codEstado),
@@ -253,21 +270,13 @@ class _CotizacionNavigationState extends State<CotizacionNavigation> {
                   ],
                 ),
                 SizedBox(height: 12),
-
-                // Nombre de la cotización
                 Text(
                   cotizacion.nombre,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87,
-                  ),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
                 SizedBox(height: 8),
-
-                // Cliente y Fecha
                 Row(
                   children: [
                     Icon(Icons.person, size: 14, color: Colors.grey[600]),
@@ -275,10 +284,7 @@ class _CotizacionNavigationState extends State<CotizacionNavigation> {
                     Expanded(
                       child: Text(
                         _getClienteName(cotizacion.idCliente),
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: Colors.grey[700],
-                        ),
+                        style: TextStyle(fontSize: 13, color: Colors.grey[700]),
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
@@ -287,15 +293,10 @@ class _CotizacionNavigationState extends State<CotizacionNavigation> {
                     SizedBox(width: 4),
                     Text(
                       cotizacion.fecha,
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: Colors.grey[700],
-                      ),
+                      style: TextStyle(fontSize: 13, color: Colors.grey[700]),
                     ),
                   ],
                 ),
-
-                // Observación si existe
                 if (cotizacion.observacion.isNotEmpty) ...[
                   SizedBox(height: 8),
                   Container(
@@ -312,11 +313,7 @@ class _CotizacionNavigationState extends State<CotizacionNavigation> {
                         Expanded(
                           child: Text(
                             cotizacion.observacion,
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey[600],
-                              fontStyle: FontStyle.italic,
-                            ),
+                            style: TextStyle(fontSize: 12, color: Colors.grey[600], fontStyle: FontStyle.italic),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -365,11 +362,7 @@ class _CotizacionNavigationState extends State<CotizacionNavigation> {
                       const SizedBox(width: 16),
                       const Text(
                         'Cotizaciones',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
                       ),
                       Spacer(),
                       IconButton(
@@ -416,24 +409,15 @@ class _CotizacionNavigationState extends State<CotizacionNavigation> {
                                   });
                                 },
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: _selectedFilter == filtro
-                                      ? const Color(0xFF2A4D69)
-                                      : Colors.white,
-                                  foregroundColor: _selectedFilter == filtro
-                                      ? Colors.white
-                                      : const Color(0xFF2A4D69),
+                                  backgroundColor: _selectedFilter == filtro ? const Color(0xFF2A4D69) : Colors.white,
+                                  foregroundColor: _selectedFilter == filtro ? Colors.white : const Color(0xFF2A4D69),
                                   elevation: _selectedFilter == filtro ? 4 : 1,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                                   padding: EdgeInsets.symmetric(vertical: 8),
                                 ),
                                 child: Text(
                                   filtro,
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 13,
-                                  ),
+                                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
                                 ),
                               ),
                             ),
@@ -451,11 +435,7 @@ class _CotizacionNavigationState extends State<CotizacionNavigation> {
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(16),
                       boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
-                          blurRadius: 10,
-                          offset: Offset(0, 4),
-                        ),
+                        BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 10, offset: Offset(0, 4)),
                       ],
                     ),
                     child: ClipRRect(
@@ -468,17 +448,9 @@ class _CotizacionNavigationState extends State<CotizacionNavigation> {
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  CircularProgressIndicator(
-                                    color: Color(0xFF2A4D69),
-                                  ),
+                                  CircularProgressIndicator(color: Color(0xFF2A4D69)),
                                   SizedBox(height: 16),
-                                  Text(
-                                    'Cargando cotizaciones...',
-                                    style: TextStyle(
-                                      color: Colors.grey[600],
-                                      fontSize: 16,
-                                    ),
-                                  ),
+                                  Text('Cargando cotizaciones...', style: TextStyle(color: Colors.grey[600], fontSize: 16)),
                                 ],
                               ),
                             );
@@ -487,36 +459,16 @@ class _CotizacionNavigationState extends State<CotizacionNavigation> {
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Icon(
-                                    Icons.error_outline,
-                                    size: 64,
-                                    color: Colors.red[300],
-                                  ),
+                                  Icon(Icons.error_outline, size: 64, color: Colors.red[300]),
                                   SizedBox(height: 16),
-                                  Text(
-                                    'Error al cargar cotizaciones',
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.red[700],
-                                    ),
-                                  ),
+                                  Text('Error al cargar cotizaciones', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.red[700])),
                                   SizedBox(height: 8),
-                                  Text(
-                                    '${snapshot.error}',
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(color: Colors.grey[600]),
-                                  ),
+                                  Text('${snapshot.error}', textAlign: TextAlign.center, style: TextStyle(color: Colors.grey[600])),
                                   SizedBox(height: 16),
                                   ElevatedButton(
                                     onPressed: _loadData,
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: Color(0xFF2A4D69),
-                                    ),
-                                    child: Text(
-                                      'Reintentar',
-                                      style: TextStyle(color: Colors.white),
-                                    ),
+                                    style: ElevatedButton.styleFrom(backgroundColor: Color(0xFF2A4D69)),
+                                    child: Text('Reintentar', style: TextStyle(color: Colors.white)),
                                   ),
                                 ],
                               ),
@@ -526,25 +478,11 @@ class _CotizacionNavigationState extends State<CotizacionNavigation> {
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Icon(
-                                    Icons.description_outlined,
-                                    size: 64,
-                                    color: Colors.grey[400],
-                                  ),
+                                  Icon(Icons.description_outlined, size: 64, color: Colors.grey[400]),
                                   SizedBox(height: 16),
-                                  Text(
-                                    'No hay cotizaciones',
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.grey[600],
-                                    ),
-                                  ),
+                                  Text('No hay cotizaciones', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.grey[600])),
                                   SizedBox(height: 8),
-                                  Text(
-                                    'Las cotizaciones que crees aparecerán aquí',
-                                    style: TextStyle(color: Colors.grey[500]),
-                                  ),
+                                  Text('Las cotizaciones que crees aparecerán aquí', style: TextStyle(color: Colors.grey[500])),
                                 ],
                               ),
                             );
@@ -564,7 +502,6 @@ class _CotizacionNavigationState extends State<CotizacionNavigation> {
                             return true;
                           }).toList();
 
-                          // Ordenar por ID descendente (más recientes primero)
                           filtradas.sort((a, b) => b.numSec.compareTo(a.numSec));
 
                           if (filtradas.isEmpty) {
@@ -572,25 +509,11 @@ class _CotizacionNavigationState extends State<CotizacionNavigation> {
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Icon(
-                                    Icons.search_off,
-                                    size: 64,
-                                    color: Colors.grey[400],
-                                  ),
+                                  Icon(Icons.search_off, size: 64, color: Colors.grey[400]),
                                   SizedBox(height: 16),
-                                  Text(
-                                    'No se encontraron resultados',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.grey[600],
-                                    ),
-                                  ),
+                                  Text('No se encontraron resultados', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.grey[600])),
                                   SizedBox(height: 8),
-                                  Text(
-                                    'Prueba con otros términos de búsqueda',
-                                    style: TextStyle(color: Colors.grey[500]),
-                                  ),
+                                  Text('Prueba con otros términos de búsqueda', style: TextStyle(color: Colors.grey[500])),
                                 ],
                               ),
                             );
@@ -628,20 +551,13 @@ class _CotizacionNavigationState extends State<CotizacionNavigation> {
           if (result == true) {
             _loadData();
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('Cotización creada exitosamente'),
-                backgroundColor: Colors.green,
-                behavior: SnackBarBehavior.floating,
-              ),
+              SnackBar(content: Text('Cotización creada exitosamente'), backgroundColor: Colors.green, behavior: SnackBarBehavior.floating),
             );
           }
         },
         backgroundColor: const Color(0xFF2A4D69),
         icon: const Icon(Icons.add, color: Colors.white),
-        label: const Text(
-          'Nueva Cotización',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
-        ),
+        label: const Text('Nueva Cotización', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
       ),
     );
   }

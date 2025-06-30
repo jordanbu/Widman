@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:widmancrm/Screens/ScreenPizarraVirtual/wave_clipper.dart';
 
 class PizarraVirtual extends StatefulWidget {
   const PizarraVirtual({super.key});
@@ -9,7 +8,6 @@ class PizarraVirtual extends StatefulWidget {
 }
 
 class _AgendaPizarraState extends State<PizarraVirtual> {
-  List<Offset?> puntos = [];
   List<NotaAgenda> notas = [];
   final TextEditingController _tituloController = TextEditingController();
   final TextEditingController _descripcionController = TextEditingController();
@@ -29,14 +27,12 @@ class _AgendaPizarraState extends State<PizarraVirtual> {
           id: DateTime.now().millisecondsSinceEpoch.toString(),
           titulo: _tituloController.text,
           descripcion: _descripcionController.text,
-          dibujo: List.from(puntos),
           fechaCreacion: DateTime.now(),
         ));
 
         // Limpiar campos
         _tituloController.clear();
         _descripcionController.clear();
-        puntos.clear();
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -123,33 +119,6 @@ class _AgendaPizarraState extends State<PizarraVirtual> {
                   Text(
                     nota.descripcion,
                     style: const TextStyle(fontSize: 14),
-                  ),
-                  const SizedBox(height: 16),
-                ],
-                if (nota.dibujo.isNotEmpty) ...[
-                  const Text(
-                    'Dibujo:',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Expanded(
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.grey[200],
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.grey[300]!),
-                      ),
-                      child: CustomPaint(
-                        painter: PizarraPainter(nota.dibujo),
-                        child: const SizedBox(
-                          width: double.infinity,
-                          height: double.infinity,
-                        ),
-                      ),
-                    ),
                   ),
                 ],
               ],
@@ -292,78 +261,18 @@ class _AgendaPizarraState extends State<PizarraVirtual> {
         ),
         const SizedBox(height: 16),
 
-        const Text(
-          'Zona de Dibujo',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            color: Color(0xFF455A64),
-          ),
-        ),
-        const SizedBox(height: 8),
-
-        // Zona de dibujo
-        Expanded(
-          child: GestureDetector(
-            onPanUpdate: (details) {
-              RenderBox box = context.findRenderObject() as RenderBox;
-              Offset point = box.globalToLocal(details.globalPosition);
-              setState(() {
-                puntos.add(point);
-              });
-            },
-            onPanEnd: (_) {
-              setState(() {
-                puntos.add(null);
-              });
-            },
-            child: ClipRRect(
+        // Botón de acción
+        ElevatedButton.icon(
+          onPressed: _guardarNota,
+          icon: const Icon(Icons.save),
+          label: const Text('Guardar'),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.green,
+            foregroundColor: Colors.white,
+            shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
-              child: CustomPaint(
-                painter: PizarraPainter(puntos),
-                child: Container(
-                  color: Colors.grey[200],
-                  width: double.infinity,
-                ),
-              ),
             ),
           ),
-        ),
-        const SizedBox(height: 16),
-
-        // Botones de acción
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            ElevatedButton.icon(
-              onPressed: () {
-                setState(() {
-                  puntos.clear();
-                });
-              },
-              icon: const Icon(Icons.clear),
-              label: const Text('Limpiar'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.orange,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-            ),
-            ElevatedButton.icon(
-              onPressed: _guardarNota,
-              icon: const Icon(Icons.save),
-              label: const Text('Guardar'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-            ),
-          ],
         ),
       ],
     );
@@ -478,21 +387,9 @@ class _AgendaPizarraState extends State<PizarraVirtual> {
                         ),
                       ],
                     ),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        if (nota.dibujo.isNotEmpty)
-                          const Icon(
-                            Icons.brush,
-                            color: Colors.blue,
-                            size: 20,
-                          ),
-                        const SizedBox(width: 8),
-                        IconButton(
-                          icon: const Icon(Icons.delete, color: Colors.red),
-                          onPressed: () => _eliminarNota(nota.id),
-                        ),
-                      ],
+                    trailing: IconButton(
+                      icon: const Icon(Icons.delete, color: Colors.red),
+                      onPressed: () => _eliminarNota(nota.id),
                     ),
                     onTap: () => _verNota(nota),
                   ),
@@ -509,36 +406,44 @@ class NotaAgenda {
   final String id;
   final String titulo;
   final String descripcion;
-  final List<Offset?> dibujo;
   final DateTime fechaCreacion;
 
   NotaAgenda({
     required this.id,
     required this.titulo,
     required this.descripcion,
-    required this.dibujo,
     required this.fechaCreacion,
   });
 }
 
-class PizarraPainter extends CustomPainter {
-  final List<Offset?> puntos;
-  PizarraPainter(this.puntos);
-
+class WaveClipper extends CustomClipper<Path> {
   @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = Colors.black
-      ..strokeWidth = 3.0
-      ..strokeCap = StrokeCap.round;
+  Path getClip(Size size) {
+    var path = Path();
+    path.lineTo(0, size.height - 50);
+    var firstControlPoint = Offset(size.width / 4, size.height);
+    var firstEndPoint = Offset(size.width / 2, size.height - 30);
+    var secondControlPoint = Offset(size.width * 3 / 4, size.height - 80);
+    var secondEndPoint = Offset(size.width, size.height - 30);
 
-    for (int i = 0; i < puntos.length - 1; i++) {
-      if (puntos[i] != null && puntos[i + 1] != null) {
-        canvas.drawLine(puntos[i]!, puntos[i + 1]!, paint);
-      }
-    }
+    path.quadraticBezierTo(
+      firstControlPoint.dx,
+      firstControlPoint.dy,
+      firstEndPoint.dx,
+      firstEndPoint.dy,
+    );
+    path.quadraticBezierTo(
+      secondControlPoint.dx,
+      secondControlPoint.dy,
+      secondEndPoint.dx,
+      secondEndPoint.dy,
+    );
+
+    path.lineTo(size.width, 0);
+    path.close();
+    return path;
   }
 
   @override
-  bool shouldRepaint(PizarraPainter oldDelegate) => true;
+  bool shouldReclip(CustomClipper<Path> oldClipper) => false;
 }

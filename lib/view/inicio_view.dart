@@ -77,23 +77,6 @@ class InicioView extends StatelessWidget {
                           ),
                           const SizedBox(height: 20),
 
-                          // Botón registrarse
-                          SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButton(
-                              onPressed: () {},
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.white,
-                                foregroundColor: const Color(0xFF2A4D69),
-                                padding: const EdgeInsets.symmetric(vertical: 16),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(30),
-                                ),
-                                side: const BorderSide(color: Color(0xFF2A4D69), width: 1.5),
-                              ),
-                              child: const Text('Regístrate'),
-                            ),
-                          ),
                           const Spacer(),
                         ],
                       ),

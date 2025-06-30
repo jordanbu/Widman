@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:widmancrm/Screens/ScreenReporteListasVencidas/wave_clipper.dart';
 
+import '../models/reporte_lista_vencidos_model.dart';
+
 class ReportListVencidas extends StatelessWidget {
   const ReportListVencidas({super.key});
 
@@ -9,7 +11,6 @@ class ReportListVencidas extends StatelessWidget {
     return Scaffold(
       body: Stack(
         children: [
-          // Background with wave curve
           ClipPath(
             clipper: WaveClipper(),
             child: Container(
@@ -23,59 +24,23 @@ class ReportListVencidas extends StatelessWidget {
               height: MediaQuery.of(context).size.height * 0.6,
             ),
           ),
-          // Main content
           SafeArea(
             child: Column(
               children: [
-                // AppBar personalizado
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       IconButton(
                         icon: const Icon(Icons.arrow_back, color: Colors.white, size: 35),
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
+                        onPressed: () => Navigator.pop(context),
                       ),
                       const SizedBox(width: 16),
                       const Text(
                         'Reporte Listas Vencidas',
-                        style: TextStyle(color: Colors.white, fontSize: 20,
-
-                        ),
+                        style: TextStyle(color: Colors.white, fontSize: 20),
                       ),
                     ],
-                  ),
-                ),
-
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 28.0),
-                    child: Card(
-                      elevation: 4,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      color: Colors.white,
-                      child: ListView(
-                        padding: const EdgeInsets.all(16),
-                        children: [
-                          const Text(
-                            'Reporte',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xFF455A64),
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-
-                        ],
-                      ),
-                    ),
                   ),
                 ),
 

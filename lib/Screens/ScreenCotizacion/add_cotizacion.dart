@@ -3,8 +3,6 @@ import 'package:widmancrm/api/api_service.dart';
 import 'package:widmancrm/models/cliente_model.dart';
 import 'package:widmancrm/models/lista_producto_venta_model.dart';
 
-import '../../navigation/stock_navigation.dart';
-
 class AddCotizacion extends StatefulWidget {
   const AddCotizacion({super.key});
 
@@ -35,19 +33,6 @@ class _AddCotizacionState extends State<AddCotizacion> {
     super.dispose();
   }
 
-  Future<void> _selectProductos() async {
-    final result = await Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const StockNavigation()),
-    );
-
-    if (result != null && result is List<ProductoVenta>) {
-      setState(() {
-        _selectedProductos = result;
-      });
-    }
-  }
-
   Future<void> _showAddProductDialog() async {
     final result = await showDialog<ProductoVenta>(
       context: context,
@@ -56,7 +41,6 @@ class _AddCotizacionState extends State<AddCotizacion> {
 
     if (result != null) {
       setState(() {
-        // Verificar si el producto ya existe para evitar duplicados
         if (!_selectedProductos.any((p) => p.numSec == result.numSec)) {
           _selectedProductos.add(result);
         } else {
@@ -174,43 +158,27 @@ class _AddCotizacionState extends State<AddCotizacion> {
           style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),
-        Row(
-          children: [
-            Expanded(
-              child: ElevatedButton(
-                onPressed: _selectProductos,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF2A4D69),
-                  padding: const EdgeInsets.symmetric(vertical: 10),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                ),
-                child: const Text(
-                  'Seleccionar Productos',
+        Align(
+          alignment: Alignment.centerLeft,
+          child: ElevatedButton(
+            onPressed: _showAddProductDialog,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.green,
+              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            ),
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.add, color: Colors.white),
+                SizedBox(width: 4),
+                Text(
+                  'Agregar Producto',
                   style: TextStyle(color: Colors.white),
                 ),
-              ),
+              ],
             ),
-            const SizedBox(width: 8),
-            ElevatedButton(
-              onPressed: _showAddProductDialog,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green,
-                padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-              ),
-              child: const Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.add, color: Colors.white),
-                  SizedBox(width: 4),
-                  Text(
-                    'Agregar',
-                    style: TextStyle(color: Colors.white),
-                  ),
-                ],
-              ),
-            ),
-          ],
+          ),
         ),
         const SizedBox(height: 8),
         _selectedProductos.isEmpty
@@ -288,9 +256,7 @@ class _AddCotizacionState extends State<AddCotizacion> {
             if (snapshot.hasError) {
               return Center(child: Text('Error al cargar clientes: ${snapshot.error}'));
             }
-
             final clientes = snapshot.data ?? [];
-
             return Form(
               key: _formKey,
               child: ListView(
@@ -376,12 +342,7 @@ class _AddProductDialogState extends State<AddProductDialog> {
                   hintText: 'Ingresa el código del producto',
                   border: OutlineInputBorder(),
                 ),
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'El código es obligatorio';
-                  }
-                  return null;
-                },
+                validator: (value) => value == null || value.trim().isEmpty ? 'El código es obligatorio' : null,
               ),
               const SizedBox(height: 12),
               TextFormField(
@@ -391,12 +352,7 @@ class _AddProductDialogState extends State<AddProductDialog> {
                   hintText: 'Ingresa el nombre del producto',
                   border: OutlineInputBorder(),
                 ),
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'El nombre es obligatorio';
-                  }
-                  return null;
-                },
+                validator: (value) => value == null || value.trim().isEmpty ? 'El nombre es obligatorio' : null,
               ),
               const SizedBox(height: 12),
               TextFormField(
@@ -408,12 +364,8 @@ class _AddProductDialogState extends State<AddProductDialog> {
                 ),
                 keyboardType: TextInputType.number,
                 validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'El stock es obligatorio';
-                  }
-                  if (int.tryParse(value) == null) {
-                    return 'Ingresa un número válido';
-                  }
+                  if (value == null || value.trim().isEmpty) return 'El stock es obligatorio';
+                  if (int.tryParse(value) == null) return 'Ingresa un número válido';
                   return null;
                 },
               ),
@@ -427,12 +379,8 @@ class _AddProductDialogState extends State<AddProductDialog> {
                 ),
                 keyboardType: TextInputType.number,
                 validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'El ID es obligatorio';
-                  }
-                  if (int.tryParse(value) == null) {
-                    return 'Ingresa un número válido';
-                  }
+                  if (value == null || value.trim().isEmpty) return 'El ID es obligatorio';
+                  if (int.tryParse(value) == null) return 'Ingresa un número válido';
                   return null;
                 },
               ),
@@ -461,13 +409,8 @@ class _AddProductDialogState extends State<AddProductDialog> {
                   const SizedBox(width: 8),
                   ElevatedButton(
                     onPressed: _crearProducto,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
-                    ),
-                    child: const Text(
-                      'Agregar',
-                      style: TextStyle(color: Colors.white),
-                    ),
+                    style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+                    child: const Text('Agregar', style: TextStyle(color: Colors.white)),
                   ),
                 ],
               ),
