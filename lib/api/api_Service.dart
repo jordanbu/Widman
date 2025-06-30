@@ -98,24 +98,51 @@ class ApiService {
     }
   }
   //GET
+  // Reemplaza este método en tu ApiService
   Future<int> registrarCotizacion(Map<String, dynamic> cotizacionData) async {
-    final url = Uri.parse('$baseUrl/RegistraCotizacion'); // Cambia el endpoint si es necesario
+    final url = Uri.parse('$baseUrl/RegistraCotizacion');
 
     try {
+      print('URL: $url'); // Debug
+      print('Datos a enviar: $cotizacionData'); // Debug
+
       final response = await http.post(
         url,
         headers: {
           'Content-Type': 'application/json; charset=utf-8',
         },
-        body: jsonEncode(jsonEncode(cotizacionData)), // Doble encode como el de prospecto
+        body: jsonEncode(cotizacionData), // Un solo encode, no doble
       );
 
+      print('Status Code: ${response.statusCode}'); // Debug
+      print('Response Body: ${response.body}'); // Debug
+
       if (response.statusCode == 200) {
-        return int.parse(response.body); // Suponiendo que devuelve un ID o código
+        // Verifica si la respuesta es un número o contiene un número
+        final responseBody = response.body.trim();
+        if (responseBody.isEmpty) {
+          throw Exception('Respuesta vacía del servidor');
+        }
+
+        // Intenta parsear como int directamente
+        try {
+          return int.parse(responseBody);
+        } catch (e) {
+          // Si falla, intenta parsear como JSON y extraer el ID
+          final jsonResponse = jsonDecode(responseBody);
+          if (jsonResponse is int) {
+            return jsonResponse;
+          } else if (jsonResponse is Map && jsonResponse.containsKey('id')) {
+            return int.parse(jsonResponse['id'].toString());
+          } else {
+            throw Exception('Formato de respuesta no esperado: $jsonResponse');
+          }
+        }
       } else {
-        throw Exception('Error al registrar cotización: ${response.statusCode}');
+        throw Exception('Error HTTP ${response.statusCode}: ${response.body}');
       }
     } catch (e) {
+      print('Error detallado: $e'); // Debug
       throw Exception('Error de conexión al registrar cotización: $e');
     }
   }
@@ -151,7 +178,7 @@ class ApiService {
     }
 //Peticiones get
   }
-  /*
+/*
   Future<List<RegistrarVenta>> fetchRegistrarVenta()async {
     final response = await http.get(Uri.parse('$baseUrl/RegistrarVenta'));
     if (response.statusCode == 200){
