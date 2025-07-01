@@ -50,7 +50,7 @@ class _CotizacionNavigationState extends State<CotizacionNavigation> {
         _clientesLoaded = true;
       });
     } catch (e) {
-      print('Error cargando clientes: $e');
+      print('');
       setState(() {
         _clientesLoaded = true;
       });

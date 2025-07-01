@@ -81,6 +81,7 @@ class _ProductoSelectorState extends State<ProductoSelector> {
                 if (snapshot.hasError) {
                   return Center(child: Text('Error: ${snapshot.error}'));
                 }
+
                 final productos = snapshot.data ?? [];
                 final filtered = _searchQuery.isEmpty
                     ? productos
@@ -98,9 +99,21 @@ class _ProductoSelectorState extends State<ProductoSelector> {
                   itemBuilder: (context, index) {
                     final producto = filtered[index];
                     return ListTile(
-                      title: Text(producto.nombre),
-                      subtitle: Text('Código: ${producto.codAlterno}'),
-                      trailing: Text('ID: ${producto.numSec}'),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      title: Text(
+                        producto.nombre,
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                      ),
+                      subtitle: Text(
+                        'Código: ${producto.codAlterno}',
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                      ),
+                      trailing: Text(
+                        'ID: ${producto.numSec}',
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
                       onTap: () {
                         widget.onProductoSelected(producto);
                         Navigator.pop(context);

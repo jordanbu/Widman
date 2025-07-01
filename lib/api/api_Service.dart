@@ -5,11 +5,14 @@ import 'package:widmancrm/models/lista_producto_venta_model.dart';
 import '../models/cliente_model.dart';
 import '../models/cotizacion_model.dart';
 import '../models/prospecto_model.dart';
+import '../models/reporte_lista_vencidos_model.dart' hide Cliente, Vendedor;
 import '../models/stock_item_models.dart';
 import '../models/venta_model.dart';
+import '../models/vendedor_model.dart';
 
 class ApiService {
-  static const String baseUrl = 'http://192.168.0.9/WIDMANCRM/Comunicacion.svc';
+  static const String baseUrl = 'http://app.singleton.com.bo/WIDMANCRM/Comunicacion.svc';
+  //URL PROBAR
 
   //GET
   Future<List<StockItem>> fetchStock() async {
@@ -188,4 +191,17 @@ class ApiService {
       throw Exception('Error al registrarVenta')
     }
   }*/
+  Future<List<Vendedor>> fetchListaVendedores() async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/ListaVendedores'),
+      headers: {'Content-Type': 'application/json; charset=utf-8'},
+    );
+
+    if (response.statusCode == 200) {
+      final List<dynamic> data = jsonDecode(response.body);
+      return data.map((json) => Vendedor.fromJson(json)).toList();
+    } else {
+      throw Exception('Error al cargar vendedores: ${response.statusCode}');
+    }
+  }
 }

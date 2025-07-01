@@ -1,10 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:widmancrm/Screens/ScreenReporteListasVencidas/wave_clipper.dart';
+import '../api/api_Service.dart';
+import '../../models/vendedor_model.dart';
 
-import '../models/reporte_lista_vencidos_model.dart';
-
-class ReportListVencidas extends StatelessWidget {
+class ReportListVencidas extends StatefulWidget {
   const ReportListVencidas({super.key});
+
+  @override
+  State<ReportListVencidas> createState() => _ReportListVencidasState();
+}
+
+class _ReportListVencidasState extends State<ReportListVencidas> {
+  late Future<List<Vendedor>> _vendedores;
+
+  @override
+  void initState() {
+    super.initState();
+    _vendedores = ApiService().fetchListaVendedores();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -37,13 +50,39 @@ class ReportListVencidas extends StatelessWidget {
                       ),
                       const SizedBox(width: 16),
                       const Text(
-                        'Reporte Listas Vencidas',
+                        'Lista de Vendedores',
                         style: TextStyle(color: Colors.white, fontSize: 20),
                       ),
                     ],
                   ),
                 ),
+                Expanded(
+                  child: FutureBuilder<List<Vendedor>>(
+                    future: _vendedores,
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(child: CircularProgressIndicator());
+                      } else if (snapshot.hasError) {
+                        return Center(child: Text('Error: ${snapshot.error}'));
+                      } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                        return const Center(child: Text('No hay vendedores'));
+                      }
 
+                      final vendedores = snapshot.data!;
+                      return ListView.builder(
+                        itemCount: vendedores.length,
+                        itemBuilder: (context, index) {
+                          final vendedor = vendedores[index];
+                          return ListTile(
+                            title: Text(vendedor.nombre),
+                            subtitle: Text('Código: ${vendedor.numSec}'),
+                            leading: const Icon(Icons.person),
+                          );
+                        },
+                      );
+                    },
+                  ),
+                ),
               ],
             ),
           ),

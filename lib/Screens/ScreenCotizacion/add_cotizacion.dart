@@ -1,4 +1,3 @@
-// screens/add_cotizacion.dart
 import 'package:flutter/material.dart';
 import 'package:widmancrm/api/api_service.dart';
 import 'package:widmancrm/models/cliente_model.dart';
@@ -23,6 +22,10 @@ class _AddCotizacionState extends State<AddCotizacion> {
 
   List<ProductoVenta> _productosSeleccionados = [];
 
+  static const _primaryColor = Color(0xFF2A4D69);
+  static const _accentColor = Color(0xFFE8ECEF);
+  static const _errorColor = Colors.redAccent;
+
   @override
   void initState() {
     super.initState();
@@ -38,12 +41,12 @@ class _AddCotizacionState extends State<AddCotizacion> {
 
   Future<void> _guardarCotizacion() async {
     if (!_formKey.currentState!.validate() || _selectedCliente == null) {
-      _showSnackBar('Completa todos los campos requeridos');
+      _showSnackBar('Completa todos los campos requeridos', isError: true);
       return;
     }
 
     if (_productosSeleccionados.isEmpty) {
-      _showSnackBar('Debe seleccionar al menos un producto');
+      _showSnackBar('Debe seleccionar al menos un producto', isError: true);
       return;
     }
 
@@ -65,16 +68,22 @@ class _AddCotizacionState extends State<AddCotizacion> {
         Navigator.pop(context, true);
       }
     } catch (e) {
-      _showSnackBar('Error al registrar: $e');
+      _showSnackBar('Error al registrar: $e', isError: true);
     } finally {
       setState(() => _isLoading = false);
     }
   }
 
-  void _showSnackBar(String message) {
+  void _showSnackBar(String message, {bool isError = false}) {
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(message)),
+        SnackBar(
+          content: Text(message, style: const TextStyle(color: Colors.white)),
+          backgroundColor: isError ? _errorColor : _primaryColor,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          margin: const EdgeInsets.all(16),
+        ),
       );
     }
   }
@@ -84,7 +93,7 @@ class _AddCotizacionState extends State<AddCotizacion> {
       context: context,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
       builder: (context) => ProductoSelector(
         onProductoSelected: (producto) {
@@ -100,18 +109,40 @@ class _AddCotizacionState extends State<AddCotizacion> {
 
   Widget _buildProductosSeleccionados() {
     if (_productosSeleccionados.isEmpty) {
-      return const Text('No se han agregado productos aún.');
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8.0),
+        child: Text(
+          'No se han agregado productos aún.',
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
+        ),
+      );
     }
     return Column(
       children: _productosSeleccionados.map((producto) {
-        return ListTile(
-          title: Text(producto.nombre),
-          subtitle: Text('Código: ${producto.codAlterno}'),
-          trailing: IconButton(
-            icon: const Icon(Icons.delete, color: Colors.red),
-            onPressed: () {
-              setState(() => _productosSeleccionados.remove(producto));
-            },
+        return Card(
+          elevation: 2,
+          margin: const EdgeInsets.symmetric(vertical: 4.0),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          child: ListTile(
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            title: Text(
+              producto.nombre,
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
+              overflow: TextOverflow.ellipsis,
+              maxLines: 2,
+            ),
+            subtitle: Text(
+              'Código: ${producto.codAlterno}',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
+            ),
+            trailing: IconButton(
+              icon: const Icon(Icons.delete, color: _errorColor),
+              onPressed: () {
+                setState(() => _productosSeleccionados.remove(producto));
+              },
+            ),
           ),
         );
       }).toList(),
@@ -124,91 +155,179 @@ class _AddCotizacionState extends State<AddCotizacion> {
       appBar: AppBar(
         title: const Text(
           'Nueva Cotización',
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
         ),
-        backgroundColor: const Color(0xFF2A4D69),
+        backgroundColor: _primaryColor,
+        elevation: 0,
+        centerTitle: true,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: FutureBuilder<List<Cliente>>(
-          future: _futureClientes,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            }
-            if (snapshot.hasError) {
-              return Center(child: Text('Error al cargar clientes: ${snapshot.error}'));
-            }
-            final clientes = snapshot.data ?? [];
-            return Form(
-              key: _formKey,
-              child: ListView(
-                children: [
-                  TextFormField(
-                    controller: _nombreController,
-                    decoration: const InputDecoration(
-                      labelText: 'Nombre de Cotización',
-                      hintText: 'Ingresa el nombre de la cotización',
-                      border: OutlineInputBorder(),
-                    ),
-                    validator: (value) =>
-                    (value == null || value.trim().isEmpty) ? 'El nombre es obligatorio' : null,
+      body: Container(
+        color: _accentColor,
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: FutureBuilder<List<Cliente>>(
+            future: _futureClientes,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator(color: _primaryColor));
+              }
+              if (snapshot.hasError) {
+                return Center(
+                  child: Text(
+                    'Error al cargar clientes: ${snapshot.error}',
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: _errorColor),
                   ),
-                  const SizedBox(height: 12),
-                  TextFormField(
-                    controller: _observacionController,
-                    decoration: const InputDecoration(
-                      labelText: 'Observación',
-                      hintText: 'Ingresa una observación (opcional)',
-                      border: OutlineInputBorder(),
+                );
+              }
+
+              final clientes = snapshot.data ?? [];
+
+              return Form(
+                key: _formKey,
+                child: ListView(
+                  children: [
+                    Card(
+                      elevation: 2,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          children: [
+                            TextFormField(
+                              controller: _nombreController,
+                              decoration: InputDecoration(
+                                labelText: 'Nombre de Cotización',
+                                hintText: 'Ingresa el nombre de la cotización',
+                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                                filled: true,
+                                fillColor: Colors.white,
+                                labelStyle: const TextStyle(color: _primaryColor),
+                                focusedBorder: OutlineInputBorder(
+                                  borderSide: const BorderSide(color: _primaryColor, width: 2),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                              validator: (value) => (value == null || value.trim().isEmpty)
+                                  ? 'El nombre es obligatorio'
+                                  : null,
+                            ),
+                            const SizedBox(height: 16),
+                            TextFormField(
+                              controller: _observacionController,
+                              maxLines: 3,
+                              decoration: InputDecoration(
+                                labelText: 'Observación',
+                                hintText: 'Ingresa una observación (opcional)',
+                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                                filled: true,
+                                fillColor: Colors.white,
+                                labelStyle: const TextStyle(color: _primaryColor),
+                                focusedBorder: OutlineInputBorder(
+                                  borderSide: const BorderSide(color: _primaryColor, width: 2),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+
+                            /// ✅ Dropdown Cliente con desborde arreglado
+                            DropdownButtonFormField<Cliente>(
+                              value: _selectedCliente,
+                              icon: const Icon(Icons.arrow_drop_down, color: Colors.black),
+                              isExpanded: true, // ✅ Esto previene el desborde
+                              decoration: InputDecoration(
+                                labelText: 'Seleccionar Cliente',
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                filled: true,
+                                fillColor: Colors.white,
+                                labelStyle: const TextStyle(color: _primaryColor),
+                                focusedBorder: OutlineInputBorder(
+                                  borderSide: const BorderSide(color: _primaryColor, width: 2),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                isDense: true,
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                              ),
+                              items: clientes.map((cliente) {
+                                return DropdownMenuItem(
+                                  value: cliente,
+                                  child: SizedBox(
+                                    width: double.infinity, // ✅ Ocupa todo el ancho disponible
+                                    child: Text(
+                                      cliente.nombre,
+                                      overflow: TextOverflow.ellipsis, // ✅ Corta el texto si es muy largo
+                                      maxLines: 1, // ✅ Solo una línea
+                                    ),
+                                  ),
+                                );
+                              }).toList(),
+                              onChanged: (cliente) => setState(() => _selectedCliente = cliente),
+                              validator: (value) =>
+                              value == null ? 'Selecciona un cliente' : null,
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
-                    maxLines: 3,
-                  ),
-                  const SizedBox(height: 12),
-                  DropdownButtonFormField<Cliente>(
-                    value: _selectedCliente,
-                    decoration: const InputDecoration(
-                      labelText: 'Seleccionar Cliente',
-                      border: OutlineInputBorder(),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Productos seleccionados',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: _primaryColor,
+                      ),
                     ),
-                    items: clientes.map((cliente) {
-                      return DropdownMenuItem(
-                        value: cliente,
-                        child: Text(cliente.nombre),
-                      );
-                    }).toList(),
-                    onChanged: (cliente) => setState(() => _selectedCliente = cliente),
-                    validator: (value) => value == null ? 'Selecciona un cliente' : null,
-                  ),
-                  const SizedBox(height: 20),
-                  const Text('Productos seleccionados', style: TextStyle(fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 8),
-                  _buildProductosSeleccionados(),
-                  const SizedBox(height: 12),
-                  TextButton.icon(
-                    onPressed: _agregarProducto,
-                    icon: const Icon(Icons.add),
-                    label: const Text('Agregar producto'),
-                  ),
-                  const SizedBox(height: 20),
-                  ElevatedButton(
-                    onPressed: _isLoading ? null : _guardarCotizacion,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF2A4D69),
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    const SizedBox(height: 8),
+                    _buildProductosSeleccionados(),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      width: double.infinity, // ✅ Botón ocupa todo el ancho
+                      child: TextButton.icon(
+                        onPressed: _agregarProducto,
+                        icon: const Icon(Icons.add, color: _primaryColor),
+                        label: const Text(
+                          'Agregar producto',
+                          style: TextStyle(color: _primaryColor, fontWeight: FontWeight.w600),
+                        ),
+                        style: TextButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            side: const BorderSide(color: _primaryColor),
+                          ),
+                        ),
+                      ),
                     ),
-                    child: _isLoading
-                        ? const CircularProgressIndicator(color: Colors.white)
-                        : const Text(
-                      'Guardar Cotización',
-                      style: TextStyle(fontSize: 16, color: Colors.white),
+                    const SizedBox(height: 20),
+                    SizedBox(
+                      width: double.infinity, // ✅ Botón ocupa todo el ancho
+                      child: ElevatedButton(
+                        onPressed: _isLoading ? null : _guardarCotizacion,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: _primaryColor,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          elevation: 3,//jordan solo puedo escribir, no puedo hacer click en nada
+                        ),
+                        child: _isLoading
+                            ? const CircularProgressIndicator(color: Colors.white)
+                            : const Text(
+                          'Guardar Cotización',
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                        ),
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            );
-          },
+                  ],
+                ),
+              );
+            },
+          ),
         ),
       ),
     );
