@@ -1,5 +1,9 @@
 import 'dart:convert';
+import 'dart:io';
+import 'dart:typed_data';
 import 'package:http/http.dart' as http;
+import 'package:path_provider/path_provider.dart';
+import 'package:open_file/open_file.dart';
 import 'package:widmancrm/models/lista_producto_venta_model.dart';
 
 import '../models/cliente_model.dart';
@@ -191,6 +195,7 @@ class ApiService {
       throw Exception('Error al registrarVenta')
     }
   }*/
+
   Future<List<Vendedor>> fetchListaVendedores() async {
     final response = await http.get(
       Uri.parse('$baseUrl/ListaVendedores'),
@@ -204,4 +209,208 @@ class ApiService {
       throw Exception('Error al cargar vendedores: ${response.statusCode}');
     }
   }
+
+
+  //---------------   PRUEBAS  ---------------
+
+  // ===== MÉTODOS PARA REPORTES PDF =====
+
+  /// Descargar reporte de cotización y abrirlo automáticamente
+  Future<bool> descargarReporteCotizacionPdf(int cotizacionId) async {
+    try {
+      final url = Uri.parse('http://app.singleton.com.bo/WIDMANCRM/ReporteCotizacionPdf?cotizacionId=$cotizacionId');
+
+      print('Descargando PDF desde: $url'); // Debug
+
+      final response = await http.get(
+        url,
+        headers: {'Content-Type': 'application/json; charset=utf-8'},
+      );
+
+      if (response.statusCode == 200) {
+        return await _guardarYAbrirPDF(
+            response.bodyBytes,
+            'cotizacion_$cotizacionId'
+        );
+      } else {
+        throw Exception('Error al descargar PDF: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error al descargar PDF: $e');
+      throw Exception('Error al descargar el PDF: $e');
+    }
+  }
+
+  /// Generar reporte con parámetros personalizados
+  Future<bool> generarReporteConParametros({
+    required String empresa,
+    required String direccion,
+    required String telefono,
+    int? cotizacionId,
+  }) async {
+    try {
+      final Map<String, dynamic> parametros = {
+        'empresa': empresa,
+        'direccion': direccion,
+        'telefono': telefono,
+        if (cotizacionId != null) 'cotizacionId': cotizacionId,
+      };
+
+      // Ajusta la URL según tu endpoint específico
+      final url = Uri.parse('$baseUrl/GenerarReporteCotizacion');
+
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json; charset=utf-8'},
+        body: jsonEncode(parametros),
+      );
+
+      if (response.statusCode == 200) {
+        // Si la respuesta es un PDF directo
+        if (response.headers['content-type']?.contains('application/pdf') == true) {
+          return await _guardarYAbrirPDF(
+              response.bodyBytes,
+              'reporte_${DateTime.now().millisecondsSinceEpoch}'
+          );
+        }
+        // Si la respuesta es Base64
+        else {
+          final pdfBase64 = response.body;
+          final pdfBytes = base64Decode(pdfBase64);
+          return await _guardarYAbrirPDF(
+              pdfBytes,
+              'reporte_${DateTime.now().millisecondsSinceEpoch}'
+          );
+        }
+      } else {
+        throw Exception('Error al generar reporte: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error al generar reporte: $e');
+      throw Exception('Error al generar reporte: $e');
+    }
+  }
+
+  /// Descargar reporte de venta
+  Future<bool> descargarReporteVentaPdf(int ventaId) async {
+    try {
+      final url = Uri.parse('http://app.singleton.com.bo/WIDMANCRM/ReporteVentaPdf?ventaId=$ventaId');
+
+      final response = await http.get(
+        url,
+        headers: {'Content-Type': 'application/json; charset=utf-8'},
+      );
+
+      if (response.statusCode == 200) {
+        return await _guardarYAbrirPDF(
+            response.bodyBytes,
+            'venta_$ventaId'
+        );
+      } else {
+        throw Exception('Error al descargar reporte de venta: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error al descargar reporte de venta: $e');
+      throw Exception('Error al descargar reporte de venta: $e');
+    }
+  }
+
+  /// Descargar reporte sin abrir (solo guardar)
+  Future<String?> descargarPDFSinAbrir(int cotizacionId) async {
+    try {
+      final url = Uri.parse('http://app.singleton.com.bo/WIDMANCRM/ReporteCotizacionPdf?cotizacionId=$cotizacionId');
+
+      final response = await http.get(
+        url,
+        headers: {'Content-Type': 'application/json; charset=utf-8'},
+      );
+
+      if (response.statusCode == 200) {
+        final directory = await getApplicationDocumentsDirectory();
+        final fileName = 'cotizacion_${cotizacionId}_${DateTime.now().millisecondsSinceEpoch}.pdf';
+        final file = File('${directory.path}/$fileName');
+
+        await file.writeAsBytes(response.bodyBytes);
+
+        return file.path;
+      } else {
+        throw Exception('Error al descargar PDF: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error al descargar PDF: $e');
+      return null;
+    }
+  }
+
+  /// Compartir PDF (para usar con share_plus)
+  Future<String?> obtenerRutaPDFParaCompartir(int cotizacionId) async {
+    try {
+      final url = Uri.parse('http://app.singleton.com.bo/WIDMANCRM/ReporteCotizacionPdf?cotizacionId=$cotizacionId');
+
+      final response = await http.get(
+        url,
+        headers: {'Content-Type': 'application/json; charset=utf-8'},
+      );
+
+      if (response.statusCode == 200) {
+        // Usar directorio temporal para compartir
+        final directory = await getTemporaryDirectory();
+        final fileName = 'cotizacion_$cotizacionId.pdf';
+        final file = File('${directory.path}/$fileName');
+
+        await file.writeAsBytes(response.bodyBytes);
+
+        return file.path;
+      } else {
+        throw Exception('Error al obtener PDF: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error al obtener PDF: $e');
+      return null;
+    }
+  }
+
+  /// Método privado para guardar y abrir PDF
+  Future<bool> _guardarYAbrirPDF(Uint8List pdfBytes, String fileName) async {
+    try {
+      final directory = await getApplicationDocumentsDirectory();
+      final file = File('${directory.path}/$fileName.pdf');
+
+      await file.writeAsBytes(pdfBytes);
+
+      // Abrir el archivo
+      final result = await OpenFile.open(file.path);
+
+      print('Archivo guardado en: ${file.path}');
+      print('Resultado de apertura: ${result.message}');
+
+      return result.type == ResultType.done;
+    } catch (e) {
+      print('Error al guardar/abrir PDF: $e');
+      return false;
+    }
+  }
+
+  /// Verificar si existe un reporte para una cotización
+  Future<bool> existeReporteCotizacion(int cotizacionId) async {
+    try {
+      final url = Uri.parse('http://app.singleton.com.bo/WIDMANCRM/VerificarReporte?cotizacionId=$cotizacionId');
+
+      final response = await http.get(
+        url,
+        headers: {'Content-Type': 'application/json; charset=utf-8'},
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return data['existe'] == true;
+      }
+      return false;
+    } catch (e) {
+      print('Error al verificar reporte: $e');
+      return false;
+    }
+  }
+
+//pruebas//
 }

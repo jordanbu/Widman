@@ -109,8 +109,6 @@ class _CotizacionNavigationState extends State<CotizacionNavigation> {
         return pw.Column(
           crossAxisAlignment: pw.CrossAxisAlignment.start,
           children: [
-            pw.Text('FarmaciaCentralSCz', style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold)),
-            pw.Text('Av. El Trompillo y Av. San Aurelio, Edificio Empre: 68823292'),
             pw.Text('Fecha de Impresión: ${DateTime.now().toString().substring(0, 19)}'),
             pw.Text('COTIZACION', style: pw.TextStyle(fontSize: 20, fontWeight: pw.FontWeight.bold)),
             pw.Text('ID Cotización: ${cotizacion.numSec}'),
@@ -120,13 +118,9 @@ class _CotizacionNavigationState extends State<CotizacionNavigation> {
             pw.Text('Válido hasta: 03/07/2025'), // Hardcoded from image
             pw.Text('Moneda: Bolivianos'), // Hardcoded from image
             pw.Table.fromTextArray(
-              headers: ['COD REF', 'CODIGO', 'DESCRIPCION', 'OBS', 'UNI', 'CANT', 'P/U', 'PARCIAL', 'DESCUENTO', 'TOTAL'],
               data: [
-                ['1', '009986', 'EUCAMELIEE X120ML-MEDIFAR', '', 'Unidad', '1.00', '89.00', '89.00', '0.00', '89.00'],
-                ['PITI-009986', '0099861', 'CURADIL 75BOLSA 250ML-SALES DE REHIDRAT.', '', 'Unidad', '1.00', '30.78', '30.78', '0.00', '30.78'],
               ],
             ),
-            pw.Text('TOTAL GENERAL: 119.78'), // Hardcoded from image
             pw.Text('Observaciones: ${cotizacion.observacion.isNotEmpty ? cotizacion.observacion : ''}'),
           ],
         );
@@ -373,6 +367,7 @@ class _CotizacionNavigationState extends State<CotizacionNavigation> {
                     ],
                   ),
                 ),
+
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   child: Column(
