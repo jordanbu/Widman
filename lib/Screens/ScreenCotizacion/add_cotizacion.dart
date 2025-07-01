@@ -1,6 +1,9 @@
+// screens/add_cotizacion.dart
 import 'package:flutter/material.dart';
 import 'package:widmancrm/api/api_service.dart';
 import 'package:widmancrm/models/cliente_model.dart';
+import 'package:widmancrm/models/lista_producto_venta_model.dart';
+import '../../widgets/producto_selector.dart';
 
 class AddCotizacion extends StatefulWidget {
   const AddCotizacion({super.key});
@@ -17,6 +20,8 @@ class _AddCotizacionState extends State<AddCotizacion> {
   Cliente? _selectedCliente;
   bool _isLoading = false;
   late Future<List<Cliente>> _futureClientes;
+
+  List<ProductoVenta> _productosSeleccionados = [];
 
   @override
   void initState() {
@@ -37,6 +42,11 @@ class _AddCotizacionState extends State<AddCotizacion> {
       return;
     }
 
+    if (_productosSeleccionados.isEmpty) {
+      _showSnackBar('Debe seleccionar al menos un producto');
+      return;
+    }
+
     setState(() => _isLoading = true);
 
     final nuevaCotizacion = {
@@ -45,6 +55,7 @@ class _AddCotizacionState extends State<AddCotizacion> {
       "idcliente": _selectedCliente!.idPersona,
       "cod_estado": "ACT",
       "tipo": 1,
+      "productos": _productosSeleccionados.map((p) => p.numSec).toList(),
     };
 
     try {
@@ -68,76 +79,42 @@ class _AddCotizacionState extends State<AddCotizacion> {
     }
   }
 
-  Widget _buildNombreField() {
-    return TextFormField(
-      controller: _nombreController,
-      decoration: const InputDecoration(
-        labelText: 'Nombre de Cotización',
-        hintText: 'Ingresa el nombre de la cotización',
-        border: OutlineInputBorder(),
+  void _agregarProducto() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      validator: (value) {
-        if (value == null || value.trim().isEmpty) {
-          return 'El nombre es obligatorio';
-        }
-        return null;
-      },
+      builder: (context) => ProductoSelector(
+        onProductoSelected: (producto) {
+          setState(() {
+            if (!_productosSeleccionados.any((p) => p.numSec == producto.numSec)) {
+              _productosSeleccionados.add(producto);
+            }
+          });
+        },
+      ),
     );
   }
 
-  Widget _buildObservacionField() {
-    return TextFormField(
-      controller: _observacionController,
-      decoration: const InputDecoration(
-        labelText: 'Observación',
-        hintText: 'Ingresa una observación (opcional)',
-        border: OutlineInputBorder(),
-      ),
-      maxLines: 3,
-    );
-  }
-
-  Widget _buildClienteDropdown(List<Cliente> clientes) {
-    return DropdownButtonFormField<Cliente>(
-      value: _selectedCliente,
-      decoration: const InputDecoration(
-        labelText: 'Seleccionar Cliente',
-        hintText: 'Elige un cliente',
-        border: OutlineInputBorder(),
-      ),
-      items: clientes.map((cliente) {
-        return DropdownMenuItem<Cliente>(
-          value: cliente,
-          child: Container(
-            constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width - 80),
-            child: Text(
-              cliente.nombre,
-              overflow: TextOverflow.ellipsis,
-              maxLines: 1,
-            ),
+  Widget _buildProductosSeleccionados() {
+    if (_productosSeleccionados.isEmpty) {
+      return const Text('No se han agregado productos aún.');
+    }
+    return Column(
+      children: _productosSeleccionados.map((producto) {
+        return ListTile(
+          title: Text(producto.nombre),
+          subtitle: Text('Código: ${producto.codAlterno}'),
+          trailing: IconButton(
+            icon: const Icon(Icons.delete, color: Colors.red),
+            onPressed: () {
+              setState(() => _productosSeleccionados.remove(producto));
+            },
           ),
         );
       }).toList(),
-      onChanged: (cliente) => setState(() => _selectedCliente = cliente),
-      validator: (value) => value == null ? 'Selecciona un cliente' : null,
-      isExpanded: true,
-    );
-  }
-
-  Widget _buildGuardarButton() {
-    return ElevatedButton(
-      onPressed: _isLoading ? null : _guardarCotizacion,
-      style: ElevatedButton.styleFrom(
-        backgroundColor: const Color(0xFF2A4D69),
-        padding: const EdgeInsets.symmetric(vertical: 14),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      ),
-      child: _isLoading
-          ? const CircularProgressIndicator(color: Colors.white)
-          : const Text(
-        'Guardar Cotización',
-        style: TextStyle(fontSize: 16, color: Colors.white),
-      ),
     );
   }
 
@@ -167,13 +144,67 @@ class _AddCotizacionState extends State<AddCotizacion> {
               key: _formKey,
               child: ListView(
                 children: [
-                  _buildNombreField(),
+                  TextFormField(
+                    controller: _nombreController,
+                    decoration: const InputDecoration(
+                      labelText: 'Nombre de Cotización',
+                      hintText: 'Ingresa el nombre de la cotización',
+                      border: OutlineInputBorder(),
+                    ),
+                    validator: (value) =>
+                    (value == null || value.trim().isEmpty) ? 'El nombre es obligatorio' : null,
+                  ),
                   const SizedBox(height: 12),
-                  _buildObservacionField(),
+                  TextFormField(
+                    controller: _observacionController,
+                    decoration: const InputDecoration(
+                      labelText: 'Observación',
+                      hintText: 'Ingresa una observación (opcional)',
+                      border: OutlineInputBorder(),
+                    ),
+                    maxLines: 3,
+                  ),
                   const SizedBox(height: 12),
-                  _buildClienteDropdown(clientes),
+                  DropdownButtonFormField<Cliente>(
+                    value: _selectedCliente,
+                    decoration: const InputDecoration(
+                      labelText: 'Seleccionar Cliente',
+                      border: OutlineInputBorder(),
+                    ),
+                    items: clientes.map((cliente) {
+                      return DropdownMenuItem(
+                        value: cliente,
+                        child: Text(cliente.nombre),
+                      );
+                    }).toList(),
+                    onChanged: (cliente) => setState(() => _selectedCliente = cliente),
+                    validator: (value) => value == null ? 'Selecciona un cliente' : null,
+                  ),
                   const SizedBox(height: 20),
-                  _buildGuardarButton(),
+                  const Text('Productos seleccionados', style: TextStyle(fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 8),
+                  _buildProductosSeleccionados(),
+                  const SizedBox(height: 12),
+                  TextButton.icon(
+                    onPressed: _agregarProducto,
+                    icon: const Icon(Icons.add),
+                    label: const Text('Agregar producto'),
+                  ),
+                  const SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: _isLoading ? null : _guardarCotizacion,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF2A4D69),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    ),
+                    child: _isLoading
+                        ? const CircularProgressIndicator(color: Colors.white)
+                        : const Text(
+                      'Guardar Cotización',
+                      style: TextStyle(fontSize: 16, color: Colors.white),
+                    ),
+                  ),
                 ],
               ),
             );
