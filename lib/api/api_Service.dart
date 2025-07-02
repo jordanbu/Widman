@@ -417,4 +417,33 @@ class ApiService {
   }
 
 //pruebas//
+  Future<bool> descargarYAbrirReportePDF() async {
+    try {
+      final url = Uri.parse('$baseUrl/DescargarPDF');
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        // Decodifica el JSON y extrae el arreglo de bytes
+        final Map<String, dynamic> jsonBody = json.decode(response.body);
+        final List<dynamic> bytesList = jsonBody['DescargarpdfResult'];
+        final Uint8List pdfBytes = Uint8List.fromList(bytesList.cast<int>());
+
+        // Guarda el PDF en un archivo temporal
+        final directory = await getTemporaryDirectory();
+        final filePath = '${directory.path}/reporte_${DateTime.now().millisecondsSinceEpoch}.pdf';
+        final file = File(filePath);
+        await file.writeAsBytes(pdfBytes);
+
+        // Abre el PDF con la app predeterminada del dispositivo
+        final result = await OpenFile.open(file.path);
+
+        return result.type == ResultType.done;
+      } else {
+        throw Exception('Error al descargar PDF: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error al descargar o abrir el PDF: $e');
+      return false;
+    }
+  }
 }
