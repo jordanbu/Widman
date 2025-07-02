@@ -16,9 +16,10 @@ import '../models/vendedor_model.dart';
 
 class ApiService {
   static const String baseUrl = 'http://app.singleton.com.bo/WIDMANCRM/Comunicacion.svc';
-  //URL PROBAR
 
-  //GET
+  // ===== MÉTODOS GET =====
+
+  /// Obtener lista de stock de productos
   Future<List<StockItem>> fetchStock() async {
     try {
       final response = await http.get(
@@ -36,12 +37,14 @@ class ApiService {
       throw Exception('Error en la conexión: $e');
     }
   }
-  //GET
+
+  /// Obtener lista de prospectos
   Future<List<Prospecto>> fetchProspectos() async {
     final response = await http.get(
       Uri.parse('$baseUrl/ListaProspectos'),
       headers: {'Content-Type': 'application/json; charset=utf-8'},
     );
+
     if (response.statusCode == 200) {
       final List<dynamic> data = jsonDecode(response.body);
       return data.map((json) => Prospecto.fromJson(json)).toList();
@@ -49,7 +52,8 @@ class ApiService {
       throw Exception('Error al cargar prospectos: ${response.statusCode}');
     }
   }
-  //Metodos get
+
+  /// Obtener lista de clientes
   Future<List<Cliente>> fetchClientes() async {
     final response = await http.get(
       Uri.parse('$baseUrl/ListaCliente'),
@@ -63,12 +67,14 @@ class ApiService {
       throw Exception('Error al cargar clientes: ${response.statusCode}');
     }
   }
-  //GET
+
+  /// Obtener lista de cotizaciones
   Future<List<Cotizacion>> fetchCotizaciones() async {
     final response = await http.get(
       Uri.parse('$baseUrl/ListaCotizacion'),
       headers: {'Content-Type': 'application/json; charset=utf-8'},
     );
+
     if (response.statusCode == 200) {
       final List<dynamic> data = jsonDecode(response.body);
       return data.map((json) => Cotizacion.fromJson(json)).toList();
@@ -76,7 +82,8 @@ class ApiService {
       throw Exception('Error al cargar cotizaciones: ${response.statusCode}');
     }
   }
-  //GET
+
+  /// Obtener lista de ventas
   Future<List<Venta>> fetchVentas() async {
     final response = await http.get(
       Uri.parse('$baseUrl/ListaVenta'),
@@ -90,7 +97,8 @@ class ApiService {
       throw Exception('Error al cargar ventas: ${response.statusCode}');
     }
   }
-//GET
+
+  /// Obtener lista de productos de venta
   Future<List<ProductoVenta>> fetchListaProductoVenta() async {
     final response = await http.get(
       Uri.parse('$baseUrl/ListaProductoVenta'),
@@ -104,38 +112,67 @@ class ApiService {
       throw Exception('Error al cargar productos de venta: ${response.statusCode}');
     }
   }
-  //GET
-  // Reemplaza este método en tu ApiService
+
+  /// Obtener lista de vendedores
+  Future<List<Vendedor>> fetchListaVendedores() async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/ListaVendedores'),
+      headers: {'Content-Type': 'application/json; charset=utf-8'},
+    );
+
+    if (response.statusCode == 200) {
+      final List<dynamic> data = jsonDecode(response.body);
+      return data.map((json) => Vendedor.fromJson(json)).toList();
+    } else {
+      throw Exception('Error al cargar vendedores: ${response.statusCode}');
+    }
+  }
+
+  /// Obtener items de stock (método alternativo)
+  Future<List<StockItem>> fetchStockItems() async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/Stock'),
+      headers: {'Content-Type': 'application/json; charset=utf-8'},
+    );
+
+    if (response.statusCode == 200) {
+      final List<dynamic> data = jsonDecode(response.body);
+      return data.map((item) => StockItem.fromJson(item)).toList();
+    } else {
+      throw Exception('Error al obtener productos: ${response.statusCode}');
+    }
+  }
+
+  // ===== MÉTODOS POST =====
+
+  /// Registrar nueva cotización
   Future<int> registrarCotizacion(Map<String, dynamic> cotizacionData) async {
     final url = Uri.parse('$baseUrl/RegistraCotizacion');
 
     try {
-      print('URL: $url'); // Debug
-      print('Datos a enviar: $cotizacionData'); // Debug
+      print('URL: $url');
+      print('Datos a enviar: $cotizacionData');
 
       final response = await http.post(
         url,
         headers: {
           'Content-Type': 'application/json; charset=utf-8',
         },
-        body: jsonEncode(cotizacionData), // Un solo encode, no doble
+        body: jsonEncode(cotizacionData),
       );
 
-      print('Status Code: ${response.statusCode}'); // Debug
-      print('Response Body: ${response.body}'); // Debug
+      print('Status Code: ${response.statusCode}');
+      print('Response Body: ${response.body}');
 
       if (response.statusCode == 200) {
-        // Verifica si la respuesta es un número o contiene un número
         final responseBody = response.body.trim();
         if (responseBody.isEmpty) {
           throw Exception('Respuesta vacía del servidor');
         }
 
-        // Intenta parsear como int directamente
         try {
           return int.parse(responseBody);
         } catch (e) {
-          // Si falla, intenta parsear como JSON y extraer el ID
           final jsonResponse = jsonDecode(responseBody);
           if (jsonResponse is int) {
             return jsonResponse;
@@ -149,11 +186,12 @@ class ApiService {
         throw Exception('Error HTTP ${response.statusCode}: ${response.body}');
       }
     } catch (e) {
-      print('Error detallado: $e'); // Debug
+      print('Error detallado: $e');
       throw Exception('Error de conexión al registrar cotización: $e');
     }
   }
-  //Metodo Post
+
+  /// Registrar nuevo prospecto
   Future<int> registrarProspecto(Map<String, dynamic> prospectoData) async {
     final url = Uri.parse('$baseUrl/RegistraClienteProspecto');
 
@@ -163,7 +201,7 @@ class ApiService {
         headers: {
           'Content-Type': 'application/json; charset=utf-8',
         },
-        body: jsonEncode(jsonEncode(prospectoData)), // Doble encode
+        body: jsonEncode(jsonEncode(prospectoData)), // Doble encode según el código original
       );
 
       if (response.statusCode == 200) {
@@ -175,47 +213,6 @@ class ApiService {
       throw Exception('Error de conexión al registrar prospecto: $e');
     }
   }
-  Future<List<StockItem>> fetchStockItems() async {
-    final response = await http.get(Uri.parse('$baseUrl/Stock')); // Ajusta tu ruta
-    if (response.statusCode == 200) {
-      final List<dynamic> data = jsonDecode(response.body);
-      return data.map((item) => StockItem.fromJson(item)).toList();
-    } else {
-      throw Exception('Error al obtener productos');
-    }
-//Peticiones get
-  }
-/*
-  Future<List<RegistrarVenta>> fetchRegistrarVenta()async {
-    final response = await http.get(Uri.parse('$baseUrl/RegistrarVenta'));
-    if (response.statusCode == 200){
-      final List<dynamic>data = jsonDecode(response.body);
-      return data.map((item)=> RegistrarVenta.fromJson(item).toList());
-    } else {
-      throw Exception('Error al registrarVenta')
-    }
-  }*/
-
-  Future<List<Vendedor>> fetchListaVendedores() async {
-    final response = await http.get(
-      Uri.parse('$baseUrl/ListaVendedores'),
-      headers: {'Content-Type': 'application/json; charset=utf-8'},
-    );
-
-    if (response.statusCode == 200) {
-      final List<dynamic> data = jsonDecode(response.body);
-      return data.map((json) => Vendedor.fromJson(json)).toList();
-    } else {
-      throw Exception('Error al cargar vendedores: ${response.statusCode}');
-    }
-    
-    
-
-
-  }
-
-
-  //---------------   PRUEBAS  ---------------
 
   // ===== MÉTODOS PARA REPORTES PDF =====
 
@@ -224,7 +221,7 @@ class ApiService {
     try {
       final url = Uri.parse('http://app.singleton.com.bo/WIDMANCRM/ReporteCotizacionPdf?cotizacionId=$cotizacionId');
 
-      print('Descargando PDF desde: $url'); // Debug
+      print('Descargando PDF desde: $url');
 
       final response = await http.get(
         url,
@@ -242,56 +239,6 @@ class ApiService {
     } catch (e) {
       print('Error al descargar PDF: $e');
       throw Exception('Error al descargar el PDF: $e');
-    }
-  }
-
-  /// Generar reporte con parámetros personalizados
-  Future<bool> generarReporteConParametros({
-    required String empresa,
-    required String direccion,
-    required String telefono,
-    int? cotizacionId,
-  }) async {
-    try {
-      final Map<String, dynamic> parametros = {
-        'empresa': empresa,
-        'direccion': direccion,
-        'telefono': telefono,
-        if (cotizacionId != null) 'cotizacionId': cotizacionId,
-      };
-
-      // Ajusta la URL según tu endpoint específico
-      final url = Uri.parse('$baseUrl/GenerarReporteCotizacion');
-
-      final response = await http.post(
-        url,
-        headers: {'Content-Type': 'application/json; charset=utf-8'},
-        body: jsonEncode(parametros),
-      );
-
-      if (response.statusCode == 200) {
-        // Si la respuesta es un PDF directo
-        if (response.headers['content-type']?.contains('application/pdf') == true) {
-          return await _guardarYAbrirPDF(
-              response.bodyBytes,
-              'reporte_${DateTime.now().millisecondsSinceEpoch}'
-          );
-        }
-        // Si la respuesta es Base64
-        else {
-          final pdfBase64 = response.body;
-          final pdfBytes = base64Decode(pdfBase64);
-          return await _guardarYAbrirPDF(
-              pdfBytes,
-              'reporte_${DateTime.now().millisecondsSinceEpoch}'
-          );
-        }
-      } else {
-        throw Exception('Error al generar reporte: ${response.statusCode}');
-      }
-    } catch (e) {
-      print('Error al generar reporte: $e');
-      throw Exception('Error al generar reporte: $e');
     }
   }
 
@@ -319,7 +266,53 @@ class ApiService {
     }
   }
 
-  /// Descargar reporte sin abrir (solo guardar)
+  /// Generar reporte con parámetros personalizados
+  Future<bool> generarReporteConParametros({
+    required String empresa,
+    required String direccion,
+    required String telefono,
+    int? cotizacionId,
+  }) async {
+    try {
+      final Map<String, dynamic> parametros = {
+        'empresa': empresa,
+        'direccion': direccion,
+        'telefono': telefono,
+        if (cotizacionId != null) 'cotizacionId': cotizacionId,
+      };
+
+      final url = Uri.parse('$baseUrl/GenerarReporteCotizacion');
+
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json; charset=utf-8'},
+        body: jsonEncode(parametros),
+      );
+
+      if (response.statusCode == 200) {
+        if (response.headers['content-type']?.contains('application/pdf') == true) {
+          return await _guardarYAbrirPDF(
+              response.bodyBytes,
+              'reporte_${DateTime.now().millisecondsSinceEpoch}'
+          );
+        } else {
+          final pdfBase64 = response.body;
+          final pdfBytes = base64Decode(pdfBase64);
+          return await _guardarYAbrirPDF(
+              pdfBytes,
+              'reporte_${DateTime.now().millisecondsSinceEpoch}'
+          );
+        }
+      } else {
+        throw Exception('Error al generar reporte: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error al generar reporte: $e');
+      throw Exception('Error al generar reporte: $e');
+    }
+  }
+
+  /// Descargar PDF sin abrir (solo guardar)
   Future<String?> descargarPDFSinAbrir(int cotizacionId) async {
     try {
       final url = Uri.parse('http://app.singleton.com.bo/WIDMANCRM/ReporteCotizacionPdf?cotizacionId=$cotizacionId');
@@ -335,7 +328,6 @@ class ApiService {
         final file = File('${directory.path}/$fileName');
 
         await file.writeAsBytes(response.bodyBytes);
-
         return file.path;
       } else {
         throw Exception('Error al descargar PDF: ${response.statusCode}');
@@ -346,7 +338,7 @@ class ApiService {
     }
   }
 
-  /// Compartir PDF (para usar con share_plus)
+  /// Obtener ruta de PDF para compartir
   Future<String?> obtenerRutaPDFParaCompartir(int cotizacionId) async {
     try {
       final url = Uri.parse('http://app.singleton.com.bo/WIDMANCRM/ReporteCotizacionPdf?cotizacionId=$cotizacionId');
@@ -357,13 +349,11 @@ class ApiService {
       );
 
       if (response.statusCode == 200) {
-        // Usar directorio temporal para compartir
         final directory = await getTemporaryDirectory();
         final fileName = 'cotizacion_$cotizacionId.pdf';
         final file = File('${directory.path}/$fileName');
 
         await file.writeAsBytes(response.bodyBytes);
-
         return file.path;
       } else {
         throw Exception('Error al obtener PDF: ${response.statusCode}');
@@ -371,27 +361,6 @@ class ApiService {
     } catch (e) {
       print('Error al obtener PDF: $e');
       return null;
-    }
-  }
-
-  /// Método privado para guardar y abrir PDF
-  Future<bool> _guardarYAbrirPDF(Uint8List pdfBytes, String fileName) async {
-    try {
-      final directory = await getApplicationDocumentsDirectory();
-      final file = File('${directory.path}/$fileName.pdf');
-
-      await file.writeAsBytes(pdfBytes);
-
-      // Abrir el archivo
-      final result = await OpenFile.open(file.path);
-
-      print('Archivo guardado en: ${file.path}');
-      print('Resultado de apertura: ${result.message}');
-
-      return result.type == ResultType.done;
-    } catch (e) {
-      print('Error al guardar/abrir PDF: $e');
-      return false;
     }
   }
 
@@ -416,33 +385,51 @@ class ApiService {
     }
   }
 
-//pruebas//
+  /// Descargar y abrir reporte PDF genérico
   Future<bool> descargarYAbrirReportePDF() async {
     try {
       final url = Uri.parse('$baseUrl/DescargarPDF');
       final response = await http.get(url);
 
       if (response.statusCode == 200) {
-        // Decodifica el JSON y extrae el arreglo de bytes
         final Map<String, dynamic> jsonBody = json.decode(response.body);
         final List<dynamic> bytesList = jsonBody['DescargarpdfResult'];
         final Uint8List pdfBytes = Uint8List.fromList(bytesList.cast<int>());
 
-        // Guarda el PDF en un archivo temporal
         final directory = await getTemporaryDirectory();
         final filePath = '${directory.path}/reporte_${DateTime.now().millisecondsSinceEpoch}.pdf';
         final file = File(filePath);
         await file.writeAsBytes(pdfBytes);
 
-        // Abre el PDF con la app predeterminada del dispositivo
         final result = await OpenFile.open(file.path);
-
         return result.type == ResultType.done;
       } else {
         throw Exception('Error al descargar PDF: ${response.statusCode}');
       }
     } catch (e) {
       print('Error al descargar o abrir el PDF: $e');
+      return false;
+    }
+  }
+
+  // ===== MÉTODOS PRIVADOS =====
+
+  /// Guardar PDF en el dispositivo y abrirlo automáticamente
+  Future<bool> _guardarYAbrirPDF(Uint8List pdfBytes, String fileName) async {
+    try {
+      final directory = await getApplicationDocumentsDirectory();
+      final file = File('${directory.path}/$fileName.pdf');
+
+      await file.writeAsBytes(pdfBytes);
+
+      final result = await OpenFile.open(file.path);
+
+      print('Archivo guardado en: ${file.path}');
+      print('Resultado de apertura: ${result.message}');
+
+      return result.type == ResultType.done;
+    } catch (e) {
+      print('Error al guardar/abrir PDF: $e');
       return false;
     }
   }
