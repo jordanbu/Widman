@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:widmancrm/api/api_service.dart';
+import 'package:widmancrm/api/api_Service.dart';
 import 'package:widmancrm/models/cliente_model.dart';
-import 'package:widmancrm/models/lista_producto_venta_model.dart';
-import '../../widgets/producto_selector.dart';
 
 class AddCotizacion extends StatefulWidget {
   const AddCotizacion({super.key});
@@ -16,15 +14,17 @@ class _AddCotizacionState extends State<AddCotizacion> {
   final _apiService = ApiService();
   final _nombreController = TextEditingController();
   final _observacionController = TextEditingController();
+
   Cliente? _selectedCliente;
   bool _isLoading = false;
   late Future<List<Cliente>> _futureClientes;
 
-  List<ProductoVenta> _productosSeleccionados = [];
-
   static const _primaryColor = Color(0xFF2A4D69);
   static const _accentColor = Color(0xFFE8ECEF);
   static const _errorColor = Colors.redAccent;
+
+  // Usuario por defecto requerido por la API
+  final String usuarioSistema = 'jclavijo@singleton.com.bo';
 
   @override
   void initState() {
@@ -45,107 +45,51 @@ class _AddCotizacionState extends State<AddCotizacion> {
       return;
     }
 
-    if (_productosSeleccionados.isEmpty) {
-      _showSnackBar('Debe seleccionar al menos un producto', isError: true);
-      return;
-    }
-
     setState(() => _isLoading = true);
 
-    final nuevaCotizacion = {
-      "nombre": _nombreController.text.trim(),
-      "observacion": _observacionController.text.trim(),
-      "idcliente": _selectedCliente!.idPersona,
-      "cod_estado": "ACT",
-      "tipo": 1,
-      "productos": _productosSeleccionados.map((p) => p.numSec).toList(),
-    };
-
     try {
-      final resultId = await _apiService.registrarCotizacion(nuevaCotizacion);
-      _showSnackBar('Cotización registrada con ID $resultId');
-      if (context.mounted) {
-        Navigator.pop(context, true);
-      }
+      final datosCotizacion = [
+        '0${_observacionController.text.trim()}', // Observación
+        '118', // Estado u otro código fijo
+        '0Empresa S.A.', // Razón social fija
+        '${_selectedCliente!.idPersona}', // ID cliente seleccionado
+        '0$usuarioSistema', // Usuario vendedor (prefijo 0)
+        '0cliente@correo.com', // Correo del cliente
+        '612', '222.0', // Producto 1
+        '16611', '220.0', // Producto 2
+        '7', // Producto 3 sin precio
+      ];
+
+      final datosParam = datosCotizacion.join('|');
+
+      final resultId = await _apiService.enviarCotizacionComoCadena(datosParam);
+      _showSnackBar('✅ Cotización registrada correctamente: ID $resultId');
+      _limpiarFormulario();
     } catch (e) {
-      _showSnackBar('Error al registrar: $e', isError: true);
+      _showSnackBar('❌ Error al registrar cotización: $e', isError: true);
     } finally {
       setState(() => _isLoading = false);
     }
   }
 
+  void _limpiarFormulario() {
+    _nombreController.clear();
+    _observacionController.clear();
+    setState(() {
+      _selectedCliente = null;
+    });
+  }
+
   void _showSnackBar(String message, {bool isError = false}) {
-    if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(message, style: const TextStyle(color: Colors.white)),
-          backgroundColor: isError ? _errorColor : _primaryColor,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-          margin: const EdgeInsets.all(16),
-        ),
-      );
-    }
-  }
-
-  void _agregarProducto() {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message, style: const TextStyle(color: Colors.white)),
+        backgroundColor: isError ? _errorColor : _primaryColor,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        margin: const EdgeInsets.all(16),
+        duration: const Duration(seconds: 3),
       ),
-      builder: (context) => ProductoSelector(
-        onProductoSelected: (producto) {
-          setState(() {
-            if (!_productosSeleccionados.any((p) => p.numSec == producto.numSec)) {
-              _productosSeleccionados.add(producto);
-            }
-          });
-        },
-      ),
-    );
-  }
-
-  Widget _buildProductosSeleccionados() {
-    if (_productosSeleccionados.isEmpty) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8.0),
-        child: Text(
-          'No se han agregado productos aún.',
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
-        ),
-      );
-    }
-    return Column(
-      children: _productosSeleccionados.map((producto) {
-        return Card(
-          elevation: 2,
-          margin: const EdgeInsets.symmetric(vertical: 4.0),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-          child: ListTile(
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            title: Text(
-              producto.nombre,
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
-              overflow: TextOverflow.ellipsis,
-              maxLines: 2,
-            ),
-            subtitle: Text(
-              'Código: ${producto.codAlterno}',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
-              overflow: TextOverflow.ellipsis,
-              maxLines: 1,
-            ),
-            trailing: IconButton(
-              icon: const Icon(Icons.delete, color: _errorColor),
-              onPressed: () {
-                setState(() => _productosSeleccionados.remove(producto));
-              },
-            ),
-          ),
-        );
-      }).toList(),
     );
   }
 
@@ -169,7 +113,9 @@ class _AddCotizacionState extends State<AddCotizacion> {
             future: _futureClientes,
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: CircularProgressIndicator(color: _primaryColor));
+                return const Center(
+                  child: CircularProgressIndicator(color: _primaryColor),
+                );
               }
               if (snapshot.hasError) {
                 return Center(
@@ -184,7 +130,7 @@ class _AddCotizacionState extends State<AddCotizacion> {
 
               return Form(
                 key: _formKey,
-                child: ListView(
+                  child: ListView(
                   children: [
                     Card(
                       elevation: 2,
@@ -197,7 +143,8 @@ class _AddCotizacionState extends State<AddCotizacion> {
                               controller: _nombreController,
                               decoration: InputDecoration(
                                 labelText: 'Nombre de Cotización',
-                                hintText: 'Ingresa el nombre de la cotización',
+                                hintText: 'Ej: Cotización Equipos Oficina',
+                                prefixIcon: Icon(Icons.assignment, color: _primaryColor),
                                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                                 filled: true,
                                 fillColor: Colors.white,
@@ -207,9 +154,8 @@ class _AddCotizacionState extends State<AddCotizacion> {
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                               ),
-                              validator: (value) => (value == null || value.trim().isEmpty)
-                                  ? 'El nombre es obligatorio'
-                                  : null,
+                              validator: (value) =>
+                              (value == null || value.trim().isEmpty) ? 'El nombre es obligatorio' : null,
                             ),
                             const SizedBox(height: 16),
                             TextFormField(
@@ -217,7 +163,8 @@ class _AddCotizacionState extends State<AddCotizacion> {
                               maxLines: 3,
                               decoration: InputDecoration(
                                 labelText: 'Observación',
-                                hintText: 'Ingresa una observación (opcional)',
+                                hintText: 'Descripción adicional (opcional)',
+                                prefixIcon: Icon(Icons.note, color: _primaryColor),
                                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                                 filled: true,
                                 fillColor: Colors.white,
@@ -229,17 +176,14 @@ class _AddCotizacionState extends State<AddCotizacion> {
                               ),
                             ),
                             const SizedBox(height: 16),
-
-                            /// ✅ Dropdown Cliente con desborde arreglado
                             DropdownButtonFormField<Cliente>(
                               value: _selectedCliente,
-                              icon: const Icon(Icons.arrow_drop_down, color: Colors.black),
-                              isExpanded: true, // ✅ Esto previene el desborde
+                              icon: const Icon(Icons.arrow_drop_down, color: _primaryColor),
+                              isExpanded: true,
                               decoration: InputDecoration(
                                 labelText: 'Seleccionar Cliente',
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
+                                prefixIcon: Icon(Icons.person, color: _primaryColor),
+                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                                 filled: true,
                                 fillColor: Colors.white,
                                 labelStyle: const TextStyle(color: _primaryColor),
@@ -247,63 +191,23 @@ class _AddCotizacionState extends State<AddCotizacion> {
                                   borderSide: const BorderSide(color: _primaryColor, width: 2),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
-                                isDense: true,
-                                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
                               ),
                               items: clientes.map((cliente) {
                                 return DropdownMenuItem(
                                   value: cliente,
-                                  child: SizedBox(
-                                    width: double.infinity, // ✅ Ocupa todo el ancho disponible
-                                    child: Text(
-                                      cliente.nombre,
-                                      overflow: TextOverflow.ellipsis, // ✅ Corta el texto si es muy largo
-                                      maxLines: 1, // ✅ Solo una línea
-                                    ),
-                                  ),
+                                  child: Text(cliente.nombre, overflow: TextOverflow.ellipsis),
                                 );
                               }).toList(),
                               onChanged: (cliente) => setState(() => _selectedCliente = cliente),
-                              validator: (value) =>
-                              value == null ? 'Selecciona un cliente' : null,
+                              validator: (value) => value == null ? 'Selecciona un cliente' : null,
                             ),
                           ],
                         ),
                       ),
                     ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Productos seleccionados',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: _primaryColor,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    _buildProductosSeleccionados(),
-                    const SizedBox(height: 12),
-                    SizedBox(
-                      width: double.infinity, // ✅ Botón ocupa todo el ancho
-                      child: TextButton.icon(
-                        onPressed: _agregarProducto,
-                        icon: const Icon(Icons.add, color: _primaryColor),
-                        label: const Text(
-                          'Agregar producto',
-                          style: TextStyle(color: _primaryColor, fontWeight: FontWeight.w600),
-                        ),
-                        style: TextButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                            side: const BorderSide(color: _primaryColor),
-                          ),
-                        ),
-                      ),
-                    ),
                     const SizedBox(height: 20),
                     SizedBox(
-                      width: double.infinity, // ✅ Botón ocupa todo el ancho
+                      width: double.infinity,
                       child: ElevatedButton(
                         onPressed: _isLoading ? null : _guardarCotizacion,
                         style: ElevatedButton.styleFrom(
@@ -313,7 +217,7 @@ class _AddCotizacionState extends State<AddCotizacion> {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          elevation: 3,//jordan solo puedo escribir, no puedo hacer click en nada
+                          elevation: 3,
                         ),
                         child: _isLoading
                             ? const CircularProgressIndicator(color: Colors.white)

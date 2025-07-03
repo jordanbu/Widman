@@ -1,43 +1,34 @@
 class ProductoVenta {
-  final String codAlterno;
-  final String nombre;
-  final int nsUnidad;
   final int numSec;
-  final int tipo;
+  final String nombre;
+  final String codAlterno;
+  final int cantidad;
+  final double precioUnitario;
 
   ProductoVenta({
-    required this.codAlterno,
-    required this.nombre,
-    required this.nsUnidad,
     required this.numSec,
-    required this.tipo,
+    required this.nombre,
+    required this.codAlterno,
+    this.cantidad = 1,
+    this.precioUnitario = 0.0,
   });
 
   factory ProductoVenta.fromJson(Map<String, dynamic> json) {
     return ProductoVenta(
-      codAlterno: json['codAlterno'],
-      nombre: json['nombre'],
-      nsUnidad: json['ns_Unidad'],
-      numSec: json['num_sec'],
-      tipo: json['tipo'],
+      numSec: json['num_sec'] ?? 0,
+      nombre: json['nombre'] ?? '',
+      codAlterno: json['cod_alterno'] ?? '',
+      precioUnitario: (json['precio_unitario'] ?? 0).toDouble(),
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'codAlterno': codAlterno,
-      'nombre': nombre,
-      'ns_Unidad': nsUnidad,
       'num_sec': numSec,
-      'tipo': tipo,
+      'nombre': nombre,
+      'cod_alterno': codAlterno,
+      'cantidad': cantidad,
+      'precio_unitario': precioUnitario,
     };
   }
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-          other is ProductoVenta && runtimeType == other.runtimeType && numSec == other.numSec;
-
-  @override
-  int get hashCode => numSec.hashCode;
 }

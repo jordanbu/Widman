@@ -1,4 +1,3 @@
-// widgets/producto_selector.dart
 import 'package:flutter/material.dart';
 import 'package:widmancrm/api/api_service.dart';
 import 'package:widmancrm/models/lista_producto_venta_model.dart';
@@ -49,6 +48,59 @@ class _ProductoSelectorState extends State<ProductoSelector> {
   void dispose() {
     _searchController.dispose();
     super.dispose();
+  }
+
+  void _mostrarDialogoEdicion(BuildContext context, ProductoVenta producto) {
+    final _cantidadController = TextEditingController(text: '1');
+    final _precioController = TextEditingController(text: producto.precioUnitario.toStringAsFixed(2));
+
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Text(producto.nombre),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: _cantidadController,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(labelText: 'Cantidad'),
+            ),
+            TextField(
+              controller: _precioController,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              decoration: const InputDecoration(labelText: 'Precio Unitario'),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              final int? cantidad = int.tryParse(_cantidadController.text);
+              final double? precio = double.tryParse(_precioController.text);
+
+              if (cantidad != null && precio != null) {
+                final nuevoProducto = ProductoVenta(
+                  numSec: producto.numSec,
+                  nombre: producto.nombre,
+                  codAlterno: producto.codAlterno,
+                  cantidad: cantidad,
+                  precioUnitario: precio,
+                );
+                widget.onProductoSelected(nuevoProducto);
+                Navigator.pop(context); // cerrar AlertDialog
+                Navigator.pop(context); // cerrar BottomSheet
+              }
+            },
+            child: const Text('Agregar'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -114,10 +166,7 @@ class _ProductoSelectorState extends State<ProductoSelector> {
                         'ID: ${producto.numSec}',
                         style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
-                      onTap: () {
-                        widget.onProductoSelected(producto);
-                        Navigator.pop(context);
-                      },
+                      onTap: () => _mostrarDialogoEdicion(context, producto),
                     );
                   },
                 );

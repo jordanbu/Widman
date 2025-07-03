@@ -17,7 +17,7 @@ import '../models/vendedor_model.dart';
 class ApiService {
   static const String baseUrl = 'http://app.singleton.com.bo/WIDMANCRM/Comunicacion.svc';
 
-  // ===== MÉTODOS GET =====
+  // ===== MÉTODOS GET =====  
 
   /// Obtener lista de stock de productos
   Future<List<StockItem>> fetchStock() async {
@@ -144,6 +144,19 @@ class ApiService {
   }
 
   // ===== MÉTODOS POST =====
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   /// Registrar nueva cotización
   Future<int> registrarCotizacion(Map<String, dynamic> cotizacionData) async {
@@ -431,6 +444,76 @@ class ApiService {
     } catch (e) {
       print('Error al guardar/abrir PDF: $e');
       return false;
+    }
+  }
+  Future<int> registrarCotizacionPostConDatosString({
+    required String observacion,
+    required String empresa,
+    required int idCliente,
+    required String emailUsuario,
+    required String emailCliente,
+    required List<Map<String, dynamic>> productos, // [{id: int, cantidad: double}]
+  }) async {
+    try {
+      // Construir string Datos en el formato que quieres
+      List<String> productosPartes = [];
+      for (var producto in productos) {
+        productosPartes.add(producto['id'].toString());
+        productosPartes.add(producto['cantidad'].toString());
+      }
+
+      final datosString =
+          '{0$observacion|118|0$empresa|$idCliente|0$emailUsuario|0$emailCliente|${productosPartes.join('|')}}';
+
+      final url = Uri.parse('$baseUrl/RegistrarCotizacion');
+
+      final body = jsonEncode({"Datos": datosString});
+
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json; charset=utf-8'},
+        body: body,
+      );
+
+      print('Status: ${response.statusCode}');
+      print('Body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final bodyResponse = response.body.trim();
+
+        if (bodyResponse.isEmpty) {
+          throw Exception('Respuesta vacía del servidor');
+        }
+
+        try {
+          return int.parse(bodyResponse);
+        } catch (e) {
+          final jsonResponse = jsonDecode(bodyResponse);
+          if (jsonResponse is int) {
+            return jsonResponse;
+          } else if (jsonResponse is Map && jsonResponse.containsKey('id')) {
+            return int.parse(jsonResponse['id'].toString());
+          } else {
+            throw Exception('Formato de respuesta no esperado: $jsonResponse');
+          }
+        }
+      } else {
+        throw Exception('Error HTTP ${response.statusCode}: ${response.body}');
+      }
+    } catch (e) {
+      print('Error en registrarCotizacionPostConDatosString: $e');
+      throw Exception('Error al registrar cotización: $e');
+    }
+  }
+  Future<String> enviarCotizacionComoCadena(String datos) async {
+    final url = Uri.parse('http://app.singleton.com.bo/WIDMANCRM/Comunicacion.svc/RegistrarCotizacion?Datos={$datos}');
+
+    final response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      return response.body;
+    } else {
+      throw Exception('Error al registrar cotización: ${response.statusCode}');
     }
   }
 }

@@ -56,7 +56,7 @@ class NavigationHelper {
   }
 
   static void navigateToOtrasAcciones(BuildContext context) {
-    _navigate(context, OtrasAcciones());
+    _navigate(context, OtrasAccionesScreen());
   }
 
   // Método para cerrar sesión
