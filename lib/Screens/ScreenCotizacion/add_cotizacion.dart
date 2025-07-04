@@ -3,7 +3,7 @@ import 'package:widmancrm/Screens/ScreenCotizacion/wave_clipper.dart';
 import 'package:widmancrm/api/api_Service.dart';
 import '../../models/lista_producto_venta_model.dart';
 
-// NUEVO: Modelo para producto con cantidad
+// Modelo para producto con cantidad
 class ProductoCotizado {
   final ProductoVenta producto;
   int cantidad;
@@ -26,6 +26,8 @@ class _AddCotizacionState extends State<AddCotizacion> {
   List<ProductoVenta> _productosTotales = [];
   List<ProductoVenta> _productosFiltrados = [];
   List<ProductoCotizado> _productosAgregados = [];
+
+  bool _isGuardando = false;
 
   @override
   void initState() {
@@ -110,6 +112,60 @@ class _AddCotizacionState extends State<AddCotizacion> {
     );
   }
 
+  Future<void> _guardarCotizacion() async {
+    if (_productosAgregados.isEmpty) return;
+
+    setState(() {
+      _isGuardando = true;
+    });
+
+    try {
+      final productos = _productosAgregados.map((p) => {
+        "id": p.producto.numSec,
+        "cantidad": p.cantidad.toDouble(),
+      }).toList();
+
+      // Datos estáticos para pruebas, modifica según tu necesidad
+      final observacion = "Cotización desde app Flutter";
+      final empresa = "Empresa XYZ";
+      final idEmpresa = 118;
+      final idCliente = 17266120;
+      final usuario = "drada";
+      final emailCliente = "jclavijo@singleton.com.bo";
+
+      final respuesta = await _apiService.registrarCotizacionDesdePantalla(
+        observacion: observacion,
+        empresa: empresa,
+        idEmpresa: idEmpresa,
+        idCliente: idCliente,
+        usuario: usuario,
+        emailCliente: emailCliente,
+        productos: productos,
+      );
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Cotización guardada. Respuesta: $respuesta')),
+        );
+        setState(() {
+          _productosAgregados.clear();
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error al guardar cotización: $e')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isGuardando = false;
+        });
+      }
+    }
+  }
+
   @override
   void dispose() {
     _searchController.dispose();
@@ -142,7 +198,8 @@ class _AddCotizacionState extends State<AddCotizacion> {
             child: SingleChildScrollView(
               physics: const BouncingScrollPhysics(),
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                padding:
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -191,12 +248,13 @@ class _AddCotizacionState extends State<AddCotizacion> {
                               decoration: InputDecoration(
                                 hintText: 'Nombre o ID del producto',
                                 filled: true,
-                                fillColor: Colors.grey,
+                                fillColor: Colors.grey[300],
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(12),
                                   borderSide: BorderSide.none,
                                 ),
-                                prefixIcon: const Icon(Icons.search, color: Color(0xFF2A4D69)),
+                                prefixIcon: const Icon(Icons.search,
+                                    color: Color(0xFF2A4D69)),
                                 suffixIcon: _searchController.text.isNotEmpty
                                     ? IconButton(
                                   icon: const Icon(Icons.clear),
@@ -216,12 +274,16 @@ class _AddCotizacionState extends State<AddCotizacion> {
                               child: FutureBuilder<List<ProductoVenta>>(
                                 future: _futureProductos,
                                 builder: (context, snapshot) {
-                                  if (snapshot.connectionState == ConnectionState.waiting) {
-                                    return const Center(child: CircularProgressIndicator());
+                                  if (snapshot.connectionState ==
+                                      ConnectionState.waiting) {
+                                    return const Center(
+                                        child: CircularProgressIndicator());
                                   } else if (snapshot.hasError) {
-                                    return const Center(child: Text('Error al cargar productos'));
+                                    return const Center(
+                                        child: Text('Error al cargar productos'));
                                   } else if (_productosFiltrados.isEmpty) {
-                                    return const Center(child: Text('No se encontraron productos'));
+                                    return const Center(
+                                        child: Text('No se encontraron productos'));
                                   }
 
                                   return ListView.builder(
@@ -232,8 +294,10 @@ class _AddCotizacionState extends State<AddCotizacion> {
                                         title: Text(producto.nombre),
                                         subtitle: Text('ID: ${producto.numSec}'),
                                         trailing: IconButton(
-                                          icon: const Icon(Icons.add_circle, color: Color(0xFF2A4D69)),
-                                          onPressed: () => _agregarProductoConCantidad(producto),
+                                          icon: const Icon(Icons.add_circle,
+                                              color: Color(0xFF2A4D69)),
+                                          onPressed: () =>
+                                              _agregarProductoConCantidad(producto),
                                         ),
                                       );
                                     },
@@ -262,7 +326,8 @@ class _AddCotizacionState extends State<AddCotizacion> {
                               itemBuilder: (context, index) {
                                 final p = _productosAgregados[index];
                                 return Card(
-                                  margin: const EdgeInsets.symmetric(vertical: 6),
+                                  margin:
+                                  const EdgeInsets.symmetric(vertical: 6),
                                   child: ListTile(
                                     title: Text(p.producto.nombre),
                                     subtitle: Text('ID: ${p.producto.numSec}'),
@@ -271,7 +336,8 @@ class _AddCotizacionState extends State<AddCotizacion> {
                                       children: [
                                         Text('x${p.cantidad}'),
                                         IconButton(
-                                          icon: const Icon(Icons.delete, color: Colors.redAccent),
+                                          icon: const Icon(Icons.delete,
+                                              color: Colors.redAccent),
                                           onPressed: () => _eliminarProducto(index),
                                         ),
                                       ],
@@ -288,14 +354,7 @@ class _AddCotizacionState extends State<AddCotizacion> {
 
                     // Guardar cotización
                     ElevatedButton(
-                      onPressed: _productosAgregados.isEmpty
-                          ? null
-                          : () {
-                        // Aquí puedes procesar la cotización con cantidades
-                        for (var item in _productosAgregados) {
-                          print('${item.producto.nombre} x${item.cantidad}');
-                        }
-                      },
+                      onPressed: _isGuardando ? null : _guardarCotizacion,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF2A4D69),
                         foregroundColor: Colors.white,
@@ -304,12 +363,15 @@ class _AddCotizacionState extends State<AddCotizacion> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      child: const Text(
+                      child: _isGuardando
+                          ? const CircularProgressIndicator(
+                        color: Colors.white,
+                      )
+                          : const Text(
                         'Guardar Cotización',
-
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.bold),
                       ),
-
                     ),
                     const SizedBox(height: 24),
                   ],
