@@ -8,6 +8,9 @@ class AddCotizacion extends StatefulWidget {
   @override
   State<AddCotizacion> createState() => _AddCotizacionState();
 }
+
+
+
 class _AddCotizacionState extends State<AddCotizacion> {
   bool enviando = false;
 
@@ -30,9 +33,11 @@ class _AddCotizacionState extends State<AddCotizacion> {
 
     String cadena = SerializacionUtils.generarCadenaEnvioAlServidor(datos);
     debugPrint("🔗 Cadena enviada: $cadena");
+//*
+
 
     final url = Uri.parse(
-      'http://app.singleton.com.bo/WIDMANCRM/Comunicacion.svc/RegistrarCotizacion?Datos=$cadena',
+      'http://192.168.0.9/WIDMANCRM/Comunicacion.svc/RegistrarCotizacion?Datos=$cadena',
     );
 
     try {
@@ -42,9 +47,10 @@ class _AddCotizacionState extends State<AddCotizacion> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('✅ Cotización registrada correctamente')),
         );
+        debugPrint("✅ Respuesta del servidor: ${response.body}");
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('❌ Error 400: Verifica los datos enviados: ${response.body}')),
+          SnackBar(content: Text('❌ Error ${response.statusCode}: Verifica los datos enviados: ${response.body}')),
         );
         debugPrint("❌ Respuesta del servidor: ${response.body}");
       }
@@ -52,6 +58,7 @@ class _AddCotizacionState extends State<AddCotizacion> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('❌ Error de red: $e')),
       );
+      debugPrint("❌ Error de red: $e");
     } finally {
       setState(() => enviando = false);
     }
