@@ -9,6 +9,7 @@ import 'package:open_file/open_file.dart';
 
 import '../models/cliente_model.dart';
 import '../models/cotizacion_model.dart';
+import '../models/precio_producto_model.dart';
 import '../models/prospecto_model.dart';
 import '../models/reporte_lista_vencidos_model.dart' hide Cliente, Vendedor;
 import '../models/stock_item_models.dart';
@@ -201,9 +202,21 @@ class ApiService {
       print('Error en registrarCotizacionDesdePantalla: \$e');
       throw Exception('Error de conexión: \$e');
     }
+
+  }
+
+  Future<List<PrecioProducto>> fetchListaPreciosPorCliente(int idCliente) async {
+    final url = Uri.parse('http://app.singleton.com.bo/WIDMANCRM/Comunicacion.svc/listaprecios?idCliente=$idCliente');
+    final response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      final List data = jsonDecode(response.body);
+      return data.map((e) => PrecioProducto.fromJson(e)).toList();
+    } else {
+      throw Exception('Error al cargar precios');
+    }
   }
 }
-
 
   // ================== MÉTODOS PARA REPORTES ==================
 
