@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import 'package:open_file/open_file.dart';
@@ -58,6 +60,14 @@ class ApiService {
       throw Exception('Error al cargar cotizaciones');
     }
   }
+
+
+  final userController = TextEditingController();
+  final passController= TextEditingController();
+
+  bool loading = false;
+
+
 
   Future<List<Venta>> fetchVentas() async {
     final response = await http.get(Uri.parse('$baseUrl/ListaVenta'));
@@ -229,3 +239,4 @@ class ApiService {
     final result = await OpenFile.open(file.path);
     return result.type == ResultType.done;
   }
+

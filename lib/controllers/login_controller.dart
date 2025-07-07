@@ -1,19 +1,36 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
-import 'package:shared_preferences/shared_preferences.dart';
 
-class LoginController{
+class LoginController {
   final TextEditingController userController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
-  bool login(){
-    return userController.text.trim()=='admin'&&
-    passwordController.text.trim()=='1234';
-  }
+  Future<List<dynamic>?> login() async {
+    final user = userController.text.trim();
+    final pass = passwordController.text.trim();
 
-  void dispose(){
-    userController.dispose();
-    passwordController.dispose();
+    final url = Uri.parse(
+      'http://app.singleton.com.bo/WIDMANCRM/Comunicacion.svc/InicioCorrecto?Usr=$user&Pwd=$pass',
+    );
+
+    try {
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        final decoded = json.decode(response.body);
+
+        final result = decoded['InicioCorrectoResult'];
+
+        // Si result es una lista y contiene al menos un valor, es válido
+        if (result is List && result.isNotEmpty) {
+          return result;
+        }
+      }
+    } catch (e) {
+      print("Error al iniciar sesión: $e");
+    }
+
+    return null; // Falló el login
   }
 }

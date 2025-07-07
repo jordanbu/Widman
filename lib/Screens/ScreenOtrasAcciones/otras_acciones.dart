@@ -10,6 +10,8 @@ class OtrasAcciones extends StatefulWidget {
 }
 
 class _OtrasAccionesState extends State<OtrasAcciones> {
+  final _formKey = GlobalKey<FormState>();
+
   final TextEditingController observacionController = TextEditingController();
   final TextEditingController empresaController = TextEditingController();
   final TextEditingController usuarioController = TextEditingController();
@@ -31,15 +33,14 @@ class _OtrasAccionesState extends State<OtrasAcciones> {
     });
 
     final url = Uri.parse(
-        'http://192.168.0.9/WIDMANCRM/Comunicacion.svc/RegistrarCotizacion?Datos=$datos');
-    
-    print('peticion enviada a: $url');
+        'http://app.singleton.com.bo/WIDMANCRM/Comunicacion.svc/RegistrarCotizacion?Datos=$datos');
+
+    print('Enviando petición a: $url');
 
     try {
-      final response = await http.get(url);
+      final response = await http.post(url);
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = json.decode(response.body);
-
         setState(() {
           cotizacionResult = data['RegistrarCotizacionResult'];
           isLoading = false;
@@ -59,6 +60,10 @@ class _OtrasAccionesState extends State<OtrasAcciones> {
   }
 
   void enviar() {
+    FocusScope.of(context).unfocus(); // Oculta el teclado
+
+    if (!_formKey.currentState!.validate()) return;
+
     final observacion = observacionController.text.trim();
     final empresa = empresaController.text.trim();
     final usuario = usuarioController.text.trim();
@@ -68,25 +73,8 @@ class _OtrasAccionesState extends State<OtrasAcciones> {
     final codigo2 = codigo2Controller.text.trim();
     final monto2 = monto2Controller.text.trim();
 
-    if (observacion.isEmpty ||
-        empresa.isEmpty ||
-        usuario.isEmpty ||
-        email.isEmpty ||
-        codigo1.isEmpty ||
-        monto1.isEmpty ||
-        codigo2.isEmpty ||
-        monto2.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Por favor completa todos los campos')),
-      );
-      return;
-    }
-
-    // Armamos el string Datos (según el patrón que diste, ejemplo):
-    // "0Observacion|18|0Empresa|17266120|0drada|0jclavijo@singleton.com.bo|6611|222.0|12|20.0|7|7"
-    //
-    // Aquí pongo el ejemplo con las variables que pusiste (ajusta si quieres):
-    final datos = "0$observacion|18|0$empresa|17266120|0$usuario|0$email|$codigo1|$monto1|12|$monto2|7|7";
+    final datos =
+        "0$observacion|18|0$empresa|17266120|0$usuario|0$email|$codigo1|$monto1|$codigo2|$monto2|7|7";
 
     fetchCotizacion(datos);
   }
@@ -104,19 +92,22 @@ class _OtrasAccionesState extends State<OtrasAcciones> {
     super.dispose();
   }
 
-  Widget campoTexto(
-      {required String label,
-        required TextEditingController controller,
-        TextInputType keyboardType = TextInputType.text}) {
+  Widget campoTexto({
+    required String label,
+    required TextEditingController controller,
+    TextInputType keyboardType = TextInputType.text,
+    String? Function(String?)? validator,
+  }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
-      child: TextField(
+      child: TextFormField(
         controller: controller,
         keyboardType: keyboardType,
         decoration: InputDecoration(
           labelText: label,
           border: const OutlineInputBorder(),
         ),
+        validator: validator,
       ),
     );
   }
@@ -126,47 +117,128 @@ class _OtrasAccionesState extends State<OtrasAcciones> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Otras Acciones'),
+        backgroundColor: const Color(0xFF2A4D69),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            campoTexto(label: 'Observacion', controller: observacionController),
-            campoTexto(label: 'Empresa', controller: empresaController),
-            campoTexto(label: 'Usuario', controller: usuarioController),
-            campoTexto(label: 'Email', controller: emailController, keyboardType: TextInputType.emailAddress),
-            campoTexto(label: 'Código 1', controller: codigo1Controller, keyboardType: TextInputType.number),
-            campoTexto(label: 'Monto 1', controller: monto1Controller, keyboardType: TextInputType.number),
-            campoTexto(label: 'Código 2', controller: codigo2Controller, keyboardType: TextInputType.number),
-            campoTexto(label: 'Monto 2', controller: monto2Controller, keyboardType: TextInputType.number),
-            const SizedBox(height: 12),
-            ElevatedButton(
-              onPressed: enviar,
-              child: const Text('Enviar Cotización'),
-            ),
-            const SizedBox(height: 24),
             Expanded(
-              child: Center(
-                child: isLoading
-                    ? const CircularProgressIndicator()
-                    : error != null
-                    ? Text(
-                  error!,
-                  style: const TextStyle(color: Colors.red),
-                )
-                    : cotizacionResult != null
-                    ? ListView.builder(
-                  itemCount: cotizacionResult!.length,
-                  itemBuilder: (context, index) {
-                    final item = cotizacionResult![index];
-                    return ListTile(
-                      leading:
-                      CircleAvatar(child: Text('${index + 1}')),
-                      title: Text(item.toString()),
-                    );
-                  },
-                )
-                    : const Text('No hay datos para mostrar'),
+              child: SingleChildScrollView(
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    children: [
+                      campoTexto(
+                        label: 'Obs',
+                        controller: observacionController,
+                        validator: (value) =>
+                        value == null || value.isEmpty ? 'Campo requerido' : null,
+                      ),
+                      campoTexto(
+                        label: 'Empresa',
+                        controller: empresaController,
+                        validator: (value) =>
+                        value == null || value.isEmpty ? 'Campo requerido' : null,
+                      ),
+                      campoTexto(
+                        label: 'Usuario',
+                        controller: usuarioController,
+                        validator: (value) =>
+                        value == null || value.isEmpty ? 'Campo requerido' : null,
+                      ),
+                      campoTexto(
+                        label: 'Email',
+                        controller: emailController,
+                        keyboardType: TextInputType.emailAddress,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) return 'Campo requerido';
+                          if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
+                            return 'Correo inválido';
+                          }
+                          return null;
+                        },
+                      ),
+                      campoTexto(
+                        label: 'Código 1',
+                        controller: codigo1Controller,
+                        keyboardType: TextInputType.number,
+                        validator: (value) =>
+                        value == null || value.isEmpty ? 'Campo requerido' : null,
+                      ),
+                      campoTexto(
+                        label: 'Monto 1',
+                        controller: monto1Controller,
+                        keyboardType: TextInputType.number,
+                        validator: (value) =>
+                        value == null || value.isEmpty ? 'Campo requerido' : null,
+                      ),
+                      campoTexto(
+                        label: 'Código 2',
+                        controller: codigo2Controller,
+                        keyboardType: TextInputType.number,
+                        validator: (value) =>
+                        value == null || value.isEmpty ? 'Campo requerido' : null,
+                      ),
+                      campoTexto(
+                        label: 'Monto 2',
+                        controller: monto2Controller,
+                        keyboardType: TextInputType.number,
+                        validator: (value) =>
+                        value == null || value.isEmpty ? 'Campo requerido' : null,
+                      ),
+                      const SizedBox(height: 16),
+                      ElevatedButton.icon(
+                        onPressed: enviar,
+                        icon: const Icon(Icons.send),
+                        label: const Text('Enviar Cotización'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF2A4D69),
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 20, vertical: 12),
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      Container(
+                        height: 300,
+                        child: Center(
+                          child: isLoading
+                              ? const CircularProgressIndicator()
+                              : error != null
+                              ? Text(
+                            error!,
+                            style: const TextStyle(color: Colors.red),
+                          )
+                              : cotizacionResult != null
+                              ? ListView.builder(
+                            itemCount: cotizacionResult!.length,
+                            itemBuilder: (context, index) {
+                              final item = cotizacionResult![index];
+                              return ListTile(
+                                leading: CircleAvatar(
+                                  backgroundColor:
+                                  const Color(0xFF2A4D69),
+                                  child: Text(
+                                    '${index + 1}',
+                                    style: const TextStyle(
+                                        color: Colors.white),
+                                  ),
+                                ),
+                                title: Text(
+                                  item.toString(),
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 2,
+                                ),
+                              );
+                            },
+                          )
+                              : const Text('No hay datos para mostrar'),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
           ],

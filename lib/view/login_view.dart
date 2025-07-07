@@ -68,10 +68,10 @@ class LoginView extends StatelessWidget {
                           TextField(
                             controller: controller.passwordController,
                             obscureText: true,
-                            decoration: _buildInputDecoration('Contraseña',
-                            ),
+                            decoration: _buildInputDecoration('Contraseña'),
                           ),
                           const SizedBox(height: 30),
+
                           // Botón ingresar
                           SizedBox(
                             width: double.infinity,
@@ -84,10 +84,18 @@ class LoginView extends StatelessWidget {
                                 backgroundColor: const Color(0xFF3C5A74),
                                 elevation: 4,
                               ),
-                              onPressed: () {
-                                if (controller.login()) {
+                              onPressed: () async {
+                                final result = await controller.login();
+
+                                if (result != null) {
+                                  // Éxito: Ir a home
                                   Navigator.pushReplacementNamed(context, AppRoutes.home);
+
+                                  // Puedes guardar datos aquí si quieres (ID, nombre)
+                                  print("ID Usuario: ${result[0]}");
+                                  print("Nombre: ${result[1]}");
                                 } else {
+                                  // Error
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(content: Text("Credenciales inválidas")),
                                   );

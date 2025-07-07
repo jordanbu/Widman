@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
-import 'package:widmancrm/api/api_service.dart';
+import 'package:widmancrm/api/api_Service.dart';
 import 'package:widmancrm/Screens/ScreenProspecto/wave_clipper.dart';
 
 class NewClient extends StatefulWidget {
