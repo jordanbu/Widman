@@ -15,7 +15,6 @@ class _RegistrarCotizacionPageState extends State<RegistrarCotizacionPage> {
   final TextEditingController _monto2Controller = TextEditingController();
 
   bool _isLoading = false;
-  String _ultimaRespuesta = '';
 
   @override
   void initState() {
@@ -46,39 +45,19 @@ class _RegistrarCotizacionPageState extends State<RegistrarCotizacionPage> {
       'http://app.singleton.com.bo/WIDMANCRM/Comunicacion.svc/RegistrarCotizacion?Datos=${Uri.encodeComponent(datos)}',
     );
 
-    debugPrint('🌐 URL completa: $url');
-
     try {
-      // Agregar headers para mejor compatibilidad
-      final response = await http.post(
-        url,
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-      ).timeout(Duration(seconds: 30));
+      final response = await http.post(url);
 
-      debugPrint('📥 Status Code: ${response.statusCode}');
-      debugPrint('📥 Headers: ${response.headers}');
-      debugPrint('📥 Body completo: ${response.body}');
-      debugPrint('📥 Body length: ${response.body.length}');
-
-      setState(() {
-        _ultimaRespuesta = response.body;
-      });
+      debugPrint('📥 Status: ${response.statusCode}');
+      debugPrint('📥 Body: ${response.body}');
 
       if (response.statusCode == 200) {
-        if (response.body.isEmpty) {
-          _mostrarError('⚠️ El servidor devolvió una respuesta vacía');
-        } else {
-          _procesarRespuesta(response.body);
-        }
+        _procesarRespuesta(response.body);
       } else {
-        _mostrarError('❌ Error HTTP ${response.statusCode}:\n${response.body}');
+        _mostrarError('Error ${response.statusCode}:\n${response.body}');
       }
     } catch (e) {
-      debugPrint('❌ Error completo: $e');
-      _mostrarError('❌ Error de conexión: $e');
+      _mostrarError('❌ Error de red: $e');
     }
 
     setState(() => _isLoading = false);
@@ -88,139 +67,64 @@ class _RegistrarCotizacionPageState extends State<RegistrarCotizacionPage> {
     try {
       debugPrint('🔍 Procesando respuesta: $responseBody');
 
-      // Verificar si la respuesta está vacía o es solo espacios
-      if (responseBody.trim().isEmpty) {
-        _mostrarError('⚠️ Respuesta vacía del servidor');
-        return;
-      }
-
-      // Verificar errores específicos del servidor
+      // Verificar si la respuesta contiene un error conocido
       if (responseBody.contains('índice estaba fuera del intervalo') ||
-          responseBody.contains('index')) {
-        _mostrarError('❌ Error de Validación del Servidor\n\n'
-            'El servidor rechazó los datos enviados. Esto puede ocurrir por:\n'
-            '• Códigos no válidos en el sistema\n'
-            '• Montos fuera del rango permitido\n'
-            '• Valores no registrados en la base de datos\n\n'
-            'Intenta con los valores por defecto que funcionan:\n'
-            '• Código 1: 6611\n'
-            '• Monto 1: 222.0\n'
-            '• Código 2: 12\n'
-            '• Monto 2: 20.0\n\n'
-            'Error completo:\n$responseBody');
+          responseBody.contains('index') ||
+          responseBody.contains('Error')) {
+        _mostrarError('Error del servidor:\n$responseBody');
         return;
       }
 
-      if (responseBody.contains('Error') || responseBody.contains('Exception')) {
-        _mostrarError('❌ Error del servidor:\n$responseBody');
-        return;
-      }
+      final jsonResponse = jsonDecode(responseBody);
 
-      // Intentar parsear como JSON
-      try {
-        final jsonResponse = jsonDecode(responseBody);
-        debugPrint('✅ JSON parseado exitosamente: $jsonResponse');
+      if (jsonResponse['RegistrarCotizacionResult'] != null) {
+        var resultado = jsonResponse['RegistrarCotizacionResult'];
 
-        if (jsonResponse['RegistrarCotizacionResult'] != null) {
-          var resultado = jsonResponse['RegistrarCotizacionResult'];
-          debugPrint('🎯 Resultado extraído: $resultado');
-          debugPrint('🎯 Tipo de resultado: ${resultado.runtimeType}');
-
-          if (resultado is List && resultado.isNotEmpty) {
-            List<String> resultadoList = resultado.map((e) => e.toString()).toList();
-            debugPrint('✅ Llamando _mostrarResultadoExitoso con: $resultadoList');
-            _mostrarResultadoExitoso(resultadoList);
-          } else if (resultado is String) {
-            if (resultado.trim().isEmpty) {
-              _mostrarError('⚠️ El servidor devolvió un resultado vacío');
-            } else {
-              _mostrarError('📝 Respuesta del servidor: $resultado');
-            }
-          } else {
-            debugPrint('❌ Resultado no es List ni String: ${resultado.runtimeType}');
-            _mostrarError('❓ Formato de respuesta inesperado: $resultado');
-          }
+        // Verificar si el resultado es una lista
+        if (resultado is List && resultado.isNotEmpty) {
+          List<String> resultadoList = resultado.map((e) => e.toString()).toList();
+          _mostrarResultadoExitoso(resultadoList);
+        } else if (resultado is String) {
+          // Si es un string, podría ser un mensaje de error
+          _mostrarError('Respuesta del servidor: $resultado');
         } else {
-          _mostrarError('❓ No se encontró RegistrarCotizacionResult en la respuesta:\n$responseBody');
+          _mostrarError('Formato de respuesta inesperado: $resultado');
         }
-      } catch (jsonError) {
-        debugPrint('❌ Error parseando JSON: $jsonError');
-        // La respuesta no es JSON válido
-        _mostrarError('❌ Respuesta no es JSON válido.\n\nRespuesta completa:\n$responseBody');
+      } else {
+        _mostrarError('Respuesta inesperada del servidor:\n$responseBody');
       }
     } catch (e) {
-      debugPrint('❌ Error general procesando respuesta: $e');
-      _mostrarError('❌ Error procesando la respuesta: $e\n\nRespuesta completa:\n$responseBody');
+      debugPrint('❌ Error parseando JSON: $e');
+      _mostrarError('Error al procesar la respuesta del servidor.\n\nRespuesta completa:\n$responseBody');
     }
   }
 
   void _mostrarResultadoExitoso(List<String> resultado) {
-    debugPrint('🎉 _mostrarResultadoExitoso llamado con: $resultado');
     showDialog(
       context: context,
-      barrierDismissible: false, // Evita que se cierre accidentalmente
       builder: (_) => AlertDialog(
-        title: Row(
-          children: [
-            Icon(Icons.check_circle, color: Colors.green),
-            SizedBox(width: 8),
-            Text('Cotización Registrada'),
-          ],
-        ),
+        title: Text('✅ Cotización Registrada'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('✅ Registro exitoso', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.green)),
-            SizedBox(height: 12),
-            if (resultado.length > 0)
-              _buildInfoRow('Empresa:', resultado[0]),
-            if (resultado.length > 1)
-              _buildInfoRow('Dirección:', resultado[1]),
-            if (resultado.length > 2)
-              _buildInfoRow('Teléfono:', resultado[2]),
-            if (resultado.length > 3)
-              _buildInfoRow('Email:', resultado[3]),
-            if (resultado.length > 4)
-              _buildInfoRow('Usuario:', resultado[4]),
-            if (resultado.length > 5)
-              Container(
-                padding: EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.blue[50],
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: _buildInfoRow('ID Cotización:', resultado[5]),
-              ),
-            if (resultado.length <= 1)
-              Text('Cotización registrada exitosamente', style: TextStyle(color: Colors.green)),
+            if (resultado.length > 0) Text('Empresa: ${resultado[0]}'),
+            if (resultado.length > 1) Text('Dirección: ${resultado[1]}'),
+            if (resultado.length > 2) Text('Teléfono: ${resultado[2]}'),
+            if (resultado.length > 3) Text('Email: ${resultado[3]}'),
+            if (resultado.length > 4) Text('Usuario: ${resultado[4]}'),
+            if (resultado.length > 5) Text('ID Cotización: ${resultado[5]}'),
+            if (resultado.length <= 1) Text('Cotización registrada exitosamente'),
           ],
         ),
         actions: [
           TextButton(
-            child: Text('OK', style: TextStyle(fontSize: 16)),
+            child: Text('OK'),
             onPressed: () {
-              debugPrint('👍 Usuario cerró diálogo exitoso');
               Navigator.of(context).pop();
               _resetFormularioConValoresPorDefecto();
             },
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildInfoRow(String label, String value) {
-    return Padding(
-      padding: EdgeInsets.only(bottom: 4),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 80,
-            child: Text(label, style: TextStyle(fontWeight: FontWeight.bold)),
-          ),
-          Expanded(child: Text(value)),
         ],
       ),
     );
@@ -231,27 +135,7 @@ class _RegistrarCotizacionPageState extends State<RegistrarCotizacionPage> {
       context: context,
       builder: (_) => AlertDialog(
         title: Text('❌ Error'),
-        content: SingleChildScrollView(
-          child: Text(mensaje),
-        ),
-        actions: [
-          TextButton(
-            child: Text('Cerrar'),
-            onPressed: () => Navigator.of(context).pop(),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _mostrarUltimaRespuesta() {
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: Text('📋 Última Respuesta del Servidor'),
-        content: SingleChildScrollView(
-          child: Text(_ultimaRespuesta.isEmpty ? 'No hay respuesta disponible' : _ultimaRespuesta),
-        ),
+        content: Text(mensaje),
         actions: [
           TextButton(
             child: Text('Cerrar'),
@@ -285,13 +169,6 @@ class _RegistrarCotizacionPageState extends State<RegistrarCotizacionPage> {
         title: Text('Registrar Cotización'),
         backgroundColor: Colors.blue[800],
         foregroundColor: Colors.white,
-        actions: [
-          IconButton(
-            icon: Icon(Icons.info_outline),
-            onPressed: _mostrarUltimaRespuesta,
-            tooltip: 'Ver última respuesta',
-          ),
-        ],
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(20),
@@ -299,29 +176,11 @@ class _RegistrarCotizacionPageState extends State<RegistrarCotizacionPage> {
           key: _formKey,
           child: Column(
             children: [
-              // Mostrar los datos que se van a enviar
-              Card(
-                color: Colors.grey[100],
-                child: Padding(
-                  padding: EdgeInsets.all(12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Datos que se enviarán:', style: TextStyle(fontWeight: FontWeight.bold)),
-                      SizedBox(height: 8),
-                      Text(construirDatos(), style: TextStyle(fontSize: 12, fontFamily: 'monospace')),
-                    ],
-                  ),
-                ),
-              ),
-              SizedBox(height: 16),
-
               TextFormField(
                 controller: _codigoController,
                 decoration: InputDecoration(
                   labelText: 'Código 1',
                   border: OutlineInputBorder(),
-                  helperText: 'Códigos válidos conocidos: 6611',
                 ),
                 validator: (value) =>
                 value == null || value.isEmpty ? 'Ingrese Código 1' : null,
@@ -332,22 +191,11 @@ class _RegistrarCotizacionPageState extends State<RegistrarCotizacionPage> {
                 decoration: InputDecoration(
                   labelText: 'Monto 1',
                   border: OutlineInputBorder(),
-                  helperText: 'Rango sugerido: 100.0 - 500.0',
                 ),
                 keyboardType: TextInputType.numberWithOptions(decimal: true),
-                validator: (value) {
-                  if (value == null || double.tryParse(value) == null) {
-                    return 'Monto inválido';
-                  }
-                  double monto = double.parse(value);
-                  if (monto < 0) {
-                    return 'El monto debe ser positivo';
-                  }
-                  if (monto > 10000) {
-                    return 'Monto muy alto, verificar';
-                  }
-                  return null;
-                },
+                validator: (value) => value == null || double.tryParse(value) == null
+                    ? 'Monto inválido'
+                    : null,
               ),
               SizedBox(height: 12),
               TextFormField(
@@ -355,7 +203,6 @@ class _RegistrarCotizacionPageState extends State<RegistrarCotizacionPage> {
                 decoration: InputDecoration(
                   labelText: 'Código 2',
                   border: OutlineInputBorder(),
-                  helperText: 'Códigos válidos conocidos: 12',
                 ),
                 validator: (value) =>
                 value == null || value.isEmpty ? 'Ingrese Código 2' : null,
@@ -366,22 +213,11 @@ class _RegistrarCotizacionPageState extends State<RegistrarCotizacionPage> {
                 decoration: InputDecoration(
                   labelText: 'Monto 2',
                   border: OutlineInputBorder(),
-                  helperText: 'Rango sugerido: 1.0 - 50.0',
                 ),
                 keyboardType: TextInputType.numberWithOptions(decimal: true),
-                validator: (value) {
-                  if (value == null || double.tryParse(value) == null) {
-                    return 'Monto inválido';
-                  }
-                  double monto = double.parse(value);
-                  if (monto < 0) {
-                    return 'El monto debe ser positivo';
-                  }
-                  if (monto > 1000) {
-                    return 'Monto muy alto, verificar';
-                  }
-                  return null;
-                },
+                validator: (value) => value == null || double.tryParse(value) == null
+                    ? 'Monto inválido'
+                    : null,
               ),
               SizedBox(height: 20),
               SizedBox(
@@ -422,22 +258,6 @@ class _RegistrarCotizacionPageState extends State<RegistrarCotizacionPage> {
                   ),
                 ),
               ),
-              SizedBox(height: 10),
-              SizedBox(
-                width: double.infinity,
-                height: 45,
-                child: ElevatedButton.icon(
-                  icon: Icon(Icons.visibility),
-                  label: Text('Ver Última Respuesta'),
-                  onPressed: _mostrarUltimaRespuesta,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.orange[700],
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8)),
-                  ),
-                ),
-              ),
             ],
           ),
         ),
@@ -453,5 +273,7 @@ void main() => runApp(MaterialApp(
     visualDensity: VisualDensity.adaptivePlatformDensity,
   ),
   home: RegistrarCotizacionPage(),
-  debugShowCheckedModeBanner: false,
 ));
+
+
+
