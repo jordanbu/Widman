@@ -117,7 +117,7 @@ class _AddCotizacionState extends State<AddCotizacion> {
   }
 
   void _mostrarDialogoProducto(ProductoVenta producto) {
-    final precioController = TextEditingController(text: '0.0');
+    final precioController = TextEditingController(text: producto.precioUnitario.toStringAsFixed(2));
     final cantidadController = TextEditingController(text: '1');
 
     showDialog(
@@ -131,6 +131,7 @@ class _AddCotizacionState extends State<AddCotizacion> {
               controller: precioController,
               keyboardType: TextInputType.number,
               decoration: const InputDecoration(labelText: 'Precio'),
+              // enabled: false, // Si no deseas que el usuario edite el precio
             ),
             TextField(
               controller: cantidadController,
@@ -179,6 +180,14 @@ class _AddCotizacionState extends State<AddCotizacion> {
       productosSeleccionados.removeAt(index);
       productosParaMostrar.removeAt(index);
     });
+  }
+
+  double _calcularTotalCotizacion() {
+    double total = 0;
+    for (var p in productosParaMostrar) {
+      total += p['subtotal'] as double;
+    }
+    return total;
   }
 
   @override
@@ -233,6 +242,21 @@ class _AddCotizacionState extends State<AddCotizacion> {
                         );
                       },
                     ),
+                  ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text('Total:',
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  Text(
+                    '\$${_calcularTotalCotizacion().toStringAsFixed(2)}',
+                    style: const TextStyle(
+                        fontSize: 18, fontWeight: FontWeight.bold, color: Colors.green),
                   ),
                 ],
               ),
