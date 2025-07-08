@@ -1,249 +1,221 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'dart:convert';
 
-class OtrasAcciones extends StatefulWidget {
-  const OtrasAcciones({super.key});
-
+class RegistrarCotizacionPage extends StatefulWidget {
   @override
-  State<OtrasAcciones> createState() => _OtrasAccionesState();
+  _RegistrarCotizacionPageState createState() => _RegistrarCotizacionPageState();
 }
 
-class _OtrasAccionesState extends State<OtrasAcciones> {
+class _RegistrarCotizacionPageState extends State<RegistrarCotizacionPage> {
   final _formKey = GlobalKey<FormState>();
+  final TextEditingController _codigoController = TextEditingController();
+  final TextEditingController _monto1Controller = TextEditingController();
+  final TextEditingController _codigo2Controller = TextEditingController();
+  final TextEditingController _monto2Controller = TextEditingController();
 
-  final TextEditingController observacionController = TextEditingController();
-  final TextEditingController empresaController = TextEditingController();
-  final TextEditingController usuarioController = TextEditingController();
-  final TextEditingController emailController = TextEditingController();
-  final TextEditingController codigo1Controller = TextEditingController();
-  final TextEditingController monto1Controller = TextEditingController();
-  final TextEditingController codigo2Controller = TextEditingController();
-  final TextEditingController monto2Controller = TextEditingController();
+  bool _isLoading = false;
 
-  List<dynamic>? cotizacionResult;
-  bool isLoading = false;
-  String? error;
+  @override
+  void initState() {
+    super.initState();
+    _codigoController.text = '6611';
+    _monto1Controller.text = '222.0';
+    _codigo2Controller.text = '12';
+    _monto2Controller.text = '20.0';
+  }
 
-  Future<void> fetchCotizacion(String datos) async {
-    setState(() {
-      isLoading = true;
-      error = null;
-      cotizacionResult = null;
-    });
+  String construirDatos() {
+    return "0no|18|0Empresa|17266120|0drada|0jclavijo@singleton.com.bo|${_codigoController.text}|${_monto1Controller.text}|${_codigo2Controller.text}|${_monto2Controller.text}|7|7";
+  }
+
+  Future<void> registrarCotizacion() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() => _isLoading = true);
+
+    String datos = construirDatos();
+    debugPrint('📤 Enviando datos (POST URL): $datos');
 
     final url = Uri.parse(
-        'http://app.singleton.com.bo/WIDMANCRM/Comunicacion.svc/RegistrarCotizacion?Datos=$datos');
-
-    print('Enviando petición a: $url');
+      'http://app.singleton.com.bo/WIDMANCRM/Comunicacion.svc/RegistrarCotizacion?Datos=${Uri.encodeComponent(datos)}',
+    );
 
     try {
       final response = await http.post(url);
+
+      debugPrint('📥 Status: ${response.statusCode}');
+      debugPrint('📥 Body: ${response.body}');
+
       if (response.statusCode == 200) {
-        final Map<String, dynamic> data = json.decode(response.body);
-        setState(() {
-          cotizacionResult = data['RegistrarCotizacionResult'];
-          isLoading = false;
-        });
+        _procesarRespuesta(response.body);
       } else {
-        setState(() {
-          error = 'Error en la respuesta: ${response.statusCode}';
-          isLoading = false;
-        });
+        _mostrarError('Error ${response.statusCode}:\n${response.body}');
       }
     } catch (e) {
-      setState(() {
-        error = 'Error al hacer la petición: $e';
-        isLoading = false;
-      });
+      _mostrarError('❌ Error de red: $e');
+    }
+
+    setState(() => _isLoading = false);
+  }
+
+  void _procesarRespuesta(String responseBody) {
+    try {
+      final jsonResponse = jsonDecode(responseBody);
+
+      if (jsonResponse['RegistrarCotizacionResult'] != null) {
+        // ✅ Corrige el error de tipo con .toString()
+        List<String> resultado = (jsonResponse['RegistrarCotizacionResult'] as List)
+            .map((e) => e.toString())
+            .toList();
+        _mostrarResultadoExitoso(resultado);
+      } else {
+        _mostrarError('Respuesta inesperada del servidor.');
+      }
+    } catch (e) {
+      _mostrarError('Error al procesar la respuesta: $e\n\n$responseBody');
     }
   }
 
-  void enviar() {
-    FocusScope.of(context).unfocus(); // Oculta el teclado
+  void _mostrarResultadoExitoso(List<String> resultado) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Text('✅ Cotización Registrada'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Empresa: ${resultado[0]}'),
+            Text('Dirección: ${resultado[1]}'),
+            Text('Teléfono: ${resultado[2]}'),
+            Text('Email: ${resultado[3]}'),
+            Text('Usuario: ${resultado[4]}'),
+            Text('ID Cotización: ${resultado[5]}'),
+          ],
+        ),
+        actions: [
+          TextButton(
+            child: Text('OK'),
+            onPressed: () {
+              Navigator.of(context).pop();
+              _limpiarFormulario();
+            },
+          ),
+        ],
+      ),
+    );
+  }
 
-    if (!_formKey.currentState!.validate()) return;
+  void _mostrarError(String mensaje) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Text('❌ Error'),
+        content: Text(mensaje),
+        actions: [
+          TextButton(
+            child: Text('Cerrar'),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+        ],
+      ),
+    );
+  }
 
-    final observacion = observacionController.text.trim();
-    final empresa = empresaController.text.trim();
-    final usuario = usuarioController.text.trim();
-    final email = emailController.text.trim();
-    final codigo1 = codigo1Controller.text.trim();
-    final monto1 = monto1Controller.text.trim();
-    final codigo2 = codigo2Controller.text.trim();
-    final monto2 = monto2Controller.text.trim();
-
-    final datos =
-        "0$observacion|18|0$empresa|17266120|0$usuario|0$email|$codigo1|$monto1|$codigo2|$monto2|7|7";
-
-    fetchCotizacion(datos);
+  void _limpiarFormulario() {
+    _codigoController.clear();
+    _monto1Controller.clear();
+    _codigo2Controller.clear();
+    _monto2Controller.clear();
   }
 
   @override
   void dispose() {
-    observacionController.dispose();
-    empresaController.dispose();
-    usuarioController.dispose();
-    emailController.dispose();
-    codigo1Controller.dispose();
-    monto1Controller.dispose();
-    codigo2Controller.dispose();
-    monto2Controller.dispose();
+    _codigoController.dispose();
+    _monto1Controller.dispose();
+    _codigo2Controller.dispose();
+    _monto2Controller.dispose();
     super.dispose();
-  }
-
-  Widget campoTexto({
-    required String label,
-    required TextEditingController controller,
-    TextInputType keyboardType = TextInputType.text,
-    String? Function(String?)? validator,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      child: TextFormField(
-        controller: controller,
-        keyboardType: keyboardType,
-        decoration: InputDecoration(
-          labelText: label,
-          border: const OutlineInputBorder(),
-        ),
-        validator: validator,
-      ),
-    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Otras Acciones'),
-        backgroundColor: const Color(0xFF2A4D69),
+        title: Text('Registrar Cotización'),
+        backgroundColor: Colors.blue[800],
+        foregroundColor: Colors.white,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            Expanded(
-              child: SingleChildScrollView(
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    children: [
-                      campoTexto(
-                        label: 'Obs',
-                        controller: observacionController,
-                        validator: (value) =>
-                        value == null || value.isEmpty ? 'Campo requerido' : null,
-                      ),
-                      campoTexto(
-                        label: 'Empresa',
-                        controller: empresaController,
-                        validator: (value) =>
-                        value == null || value.isEmpty ? 'Campo requerido' : null,
-                      ),
-                      campoTexto(
-                        label: 'Usuario',
-                        controller: usuarioController,
-                        validator: (value) =>
-                        value == null || value.isEmpty ? 'Campo requerido' : null,
-                      ),
-                      campoTexto(
-                        label: 'Email',
-                        controller: emailController,
-                        keyboardType: TextInputType.emailAddress,
-                        validator: (value) {
-                          if (value == null || value.isEmpty) return 'Campo requerido';
-                          if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
-                            return 'Correo inválido';
-                          }
-                          return null;
-                        },
-                      ),
-                      campoTexto(
-                        label: 'Código 1',
-                        controller: codigo1Controller,
-                        keyboardType: TextInputType.number,
-                        validator: (value) =>
-                        value == null || value.isEmpty ? 'Campo requerido' : null,
-                      ),
-                      campoTexto(
-                        label: 'Monto 1',
-                        controller: monto1Controller,
-                        keyboardType: TextInputType.number,
-                        validator: (value) =>
-                        value == null || value.isEmpty ? 'Campo requerido' : null,
-                      ),
-                      campoTexto(
-                        label: 'Código 2',
-                        controller: codigo2Controller,
-                        keyboardType: TextInputType.number,
-                        validator: (value) =>
-                        value == null || value.isEmpty ? 'Campo requerido' : null,
-                      ),
-                      campoTexto(
-                        label: 'Monto 2',
-                        controller: monto2Controller,
-                        keyboardType: TextInputType.number,
-                        validator: (value) =>
-                        value == null || value.isEmpty ? 'Campo requerido' : null,
-                      ),
-                      const SizedBox(height: 16),
-                      ElevatedButton.icon(
-                        onPressed: enviar,
-                        icon: const Icon(Icons.send),
-                        label: const Text('Enviar Cotización'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF2A4D69),
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 12),
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      Container(
-                        height: 300,
-                        child: Center(
-                          child: isLoading
-                              ? const CircularProgressIndicator()
-                              : error != null
-                              ? Text(
-                            error!,
-                            style: const TextStyle(color: Colors.red),
-                          )
-                              : cotizacionResult != null
-                              ? ListView.builder(
-                            itemCount: cotizacionResult!.length,
-                            itemBuilder: (context, index) {
-                              final item = cotizacionResult![index];
-                              return ListTile(
-                                leading: CircleAvatar(
-                                  backgroundColor:
-                                  const Color(0xFF2A4D69),
-                                  child: Text(
-                                    '${index + 1}',
-                                    style: const TextStyle(
-                                        color: Colors.white),
-                                  ),
-                                ),
-                                title: Text(
-                                  item.toString(),
-                                  overflow: TextOverflow.ellipsis,
-                                  maxLines: 2,
-                                ),
-                              );
-                            },
-                          )
-                              : const Text('No hay datos para mostrar'),
-                        ),
-                      ),
-                    ],
+      body: Container(
+        padding: EdgeInsets.all(20),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            children: [
+              TextFormField(
+                controller: _codigoController,
+                decoration: InputDecoration(
+                  labelText: 'Código 1',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) => value == null || value.isEmpty ? 'Ingrese Código 1' : null,
+              ),
+              SizedBox(height: 12),
+              TextFormField(
+                controller: _monto1Controller,
+                decoration: InputDecoration(
+                  labelText: 'Monto 1',
+                  border: OutlineInputBorder(),
+                ),
+                keyboardType: TextInputType.numberWithOptions(decimal: true),
+                validator: (value) => value == null || double.tryParse(value) == null ? 'Monto inválido' : null,
+              ),
+              SizedBox(height: 12),
+              TextFormField(
+                controller: _codigo2Controller,
+                decoration: InputDecoration(
+                  labelText: 'Código 2',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) => value == null || value.isEmpty ? 'Ingrese Código 2' : null,
+              ),
+              SizedBox(height: 12),
+              TextFormField(
+                controller: _monto2Controller,
+                decoration: InputDecoration(
+                  labelText: 'Monto 2',
+                  border: OutlineInputBorder(),
+                ),
+                keyboardType: TextInputType.numberWithOptions(decimal: true),
+                validator: (value) => value == null || double.tryParse(value) == null ? 'Monto inválido' : null,
+              ),
+              SizedBox(height: 20),
+              SizedBox(
+                width: double.infinity,
+                height: 45,
+                child: ElevatedButton.icon(
+                  icon: _isLoading
+                      ? SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                  )
+                      : Icon(Icons.send),
+                  label: Text(_isLoading ? 'Enviando...' : 'Enviar Cotización'),
+                  onPressed: _isLoading ? null : registrarCotizacion,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue[800],
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
 }
+
+void main() => runApp(MaterialApp(home: RegistrarCotizacionPage()));
